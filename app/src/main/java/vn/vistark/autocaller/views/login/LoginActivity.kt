@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_login.*
+import vn.vistark.autocaller.MainActivity
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.views.campaign.CampaignActivity
@@ -49,18 +50,32 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // Nếu sai mật khẩu
-        if (inputPass != AppStorage.AppPassword) {
+        // Nếu sai mật khẩu và vượt quá số lần quy định
+        if (inputPass != AppStorage.AppPassword && AppStorage.LoginFail > AppStorage.MAX_LOGIN_FAIL) {
+            gotoMain()
+            return
+        }
+
+        // Nếu sai mật khẩu nhưng chưa vượt quá số lần quy định
+        if (inputPass != AppStorage.AppPassword && AppStorage.LoginFail <= AppStorage.MAX_LOGIN_FAIL) {
+
+            // Nếu là thử lần cuối
+            if (AppStorage.MAX_LOGIN_FAIL - AppStorage.LoginFail == 0)
+                Toasty.error(
+                    this,
+                    "Sai mật khẩu, hãy thử lại một lần cuối cùng.",
+                    Toasty.LENGTH_SHORT,
+                    true
+                ).show()
+            else
+                Toasty.error(
+                    this,
+                    "Sai mật khẩu, bạn còn ${AppStorage.MAX_LOGIN_FAIL - AppStorage.LoginFail} lần thử.",
+                    Toasty.LENGTH_SHORT,
+                    true
+                ).show()
             // Tăng đếm số lần sai
             AppStorage.LoginFail += 1
-
-            // Thông báo
-            Toasty.error(
-                this,
-                "Sai mật khẩu, bạn còn ${AppStorage.MAX_LOGIN_FAIL - AppStorage.LoginFail} lần thử.",
-                Toasty.LENGTH_SHORT,
-                true
-            ).show()
             return
         }
 
@@ -84,6 +99,12 @@ class LoginActivity : AppCompatActivity() {
 
     private fun gotoCampaign() {
         val intent = Intent(this, CampaignActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun gotoMain() {
+        val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
     }

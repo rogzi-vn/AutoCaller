@@ -3,55 +3,69 @@ package vn.vistark.autocaller.utils.call_phone
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.CountDownTimer
 import android.telephony.TelephonyManager
-import android.util.Log
-import android.widget.Toast
 import java.lang.reflect.Method
 import java.util.*
 
 
+// https://stackoverflow.com/questions/9684866/how-to-detect-when-phone-is-answered-or-rejected
 class PhoneStateReceiver : BroadcastReceiver() {
+    // Kiểm tra xem đây có phải lầ đầu chạy lại không
+    var isFirstRun = true
+
+    // Biến lưu trữ trạng thái trước đó
+    var previousState = TelephonyManager.EXTRA_STATE_IDLE
+
+    // Biến lưu giữ Timer
+    var timer: Timer? = null
+
     // Lấy tag log là tên class hiện tại
     var TAG = PhoneStateReceiver::class.java.simpleName
 
     // Khi nhận được trạng thái về cuộc gọi
-    override fun onReceive(context: Context, intent: Intent?) {
-        if (intent!!.action.equals("android.intent.action.PHONE_STATE")) {
-            val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
-            Log.d(TAG, ">>>>>> Trạng thái cuộc gọi = $state")
-            if (state == TelephonyManager.EXTRA_STATE_IDLE) {
-//                Toast.makeText(context, "Gác máy EXTRA_STATE_IDLE", Toast.LENGTH_SHORT).show()
-                // Gác máy, kết thúc cuộc gọi
-                Log.d(TAG, "PhoneStateReceiver**Idle")
-            } else if (state == TelephonyManager.EXTRA_STATE_RINGING) {
-//                Toast.makeText(context, "Đổ chuông EXTRA_STATE_RINGING", Toast.LENGTH_SHORT).show()
-//                // Incoming call
-//                val incomingNumber =
-//                    intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
-//                Log.d(TAG, "PhoneStateReceiver**Incoming call $incomingNumber")
-//                if (!killCall(context)) { // Using the method defined earlier
-//                    Log.d(TAG, "PhoneStateReceiver **Unable to kill incoming call")
-//                }
-            } else if (state == TelephonyManager.EXTRA_STATE_OFFHOOK) {
-//                Toast.makeText(context, "Đã trả lời EXTRA_STATE_OFFHOOK", Toast.LENGTH_SHORT).show()
-                Log.d(TAG, "OFFHOOK: Đã trả lời")
-                Timer().schedule(object : TimerTask() {
-                    override fun run() {
-                        this.cancel()
-                        killCall(context)
-                    }
-                }, 8000)
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
+            when (intent.getStringExtra(TelephonyManager.EXTRA_STATE)) {
+                TelephonyManager.EXTRA_STATE_IDLE -> {
+                    // Làm mới trạng thái hiện tại
+                    previousState = TelephonyManager.EXTRA_STATE_IDLE
+                }
+                TelephonyManager.EXTRA_STATE_RINGING -> {
+                    // Làm mới trạng thái hiện tại
+                    previousState = TelephonyManager.EXTRA_STATE_RINGING
+                }
+                TelephonyManager.EXTRA_STATE_OFFHOOK -> {
+                    // Nếu trước đó đang là trạng thái nghỉ
+                    if (previousState == TelephonyManager.EXTRA_STATE_IDLE)
+                        KillCallTimer(context)
+
+                    // Làm mới trạng thái hiện tại
+                    previousState = TelephonyManager.EXTRA_STATE_OFFHOOK
+                }
             }
-        } else if (intent.action.equals("android.intent.action.NEW_OUTGOING_CALL")) {
-//            Toast.makeText(context, "Có cuộc gọi đến NEW_OUTGOING_CALL", Toast.LENGTH_SHORT).show()
-            // Outgoing call
-            val outgoingNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER)
-            Log.d(TAG, "PhoneStateReceiver **Outgoing call $outgoingNumber")
-            resultData = null // Kills the outgoing call
         } else {
-//            Toast.makeText(context, "Không biết ${intent.action}", Toast.LENGTH_SHORT).show()
-            Log.d(TAG, "PhoneStateReceiver **unexpected intent.action=" + intent.action)
+            previousState = TelephonyManager.EXTRA_STATE_IDLE
         }
+
+        isFirstRun = false
+    }
+
+    private fun KillCallTimer(context: Context) {
+        // Thời gian chờ
+        var timeDelay = 6380L
+
+        // Nếu không phải lần đầu, +1s
+        timeDelay += 1450
+
+        // Đếm ngược
+        object : CountDownTimer(timeDelay, 750) {
+            override fun onTick(millisUntilFinished: Long) {}
+            override fun onFinish() {
+                // Kết thúc cuộc gọi ngay lập tức
+                killCall(context)
+            }
+        }.start()
     }
 
     private fun killCall(context: Context): Boolean {
@@ -73,13 +87,12 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
             // Get the endCall method from ITelephony
             val telephonyInterfaceClass =
-                Class.forName(telephonyInterface?.javaClass?.name ?: "Chịu")
+                Class.forName(telephonyInterface?.javaClass?.name ?: "ERROR?")
             val methodEndCall: Method = telephonyInterfaceClass.getDeclaredMethod("endCall")
 
             // Invoke endCall()
             methodEndCall.invoke(telephonyInterface)
         } catch (ex: Exception) { // Many things can go wrong with reflection calls
-            Log.d(TAG, "PhoneStateReceiver **$ex")
             return false
         }
         return true

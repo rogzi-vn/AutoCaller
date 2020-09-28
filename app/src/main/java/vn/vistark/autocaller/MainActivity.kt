@@ -15,6 +15,8 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    //
+
     // Biến chứa thời gian khởi đầu tải
     var startLoadMilis = -1L;
 
@@ -45,20 +47,15 @@ class MainActivity : AppCompatActivity() {
 
         // Nếu đăng nhập sai quá số lần quy định, lock app
         if (AppStorage.LoginFail > AppStorage.MAX_LOGIN_FAIL) {
-            blockNotifier?.show("Bạn đã đăng nhập sai quá ${AppStorage.MAX_LOGIN_FAIL}! Ứng dụng sẽ bị khóa vình viễn. Hãy liên hệ chủ sở hữu để giải quyết.")
+            blockNotifier?.show("Bạn đã đăng nhập sai quá ${AppStorage.MAX_LOGIN_FAIL} lần! Ứng dụng sẽ bị khóa vình viễn. Hãy liên hệ chủ sở hữu để giải quyết.")
             return
         }
 
         // cập nhật thời gian bắt đầu tải
         startLoadMilis = System.currentTimeMillis()
 
-        // Tải đối tượng AppLicense
-        LicenseLoad().apply {
-            onFinished = {
-                // Sau khi hoàn thành thì thực hiện các task tiếp theo
-                contiuosTask(it)
-            }
-        }.execute()
+        // Đối tượng appLicense
+        contiuosTask(AppLicense())
     }
 
     private fun contiuosTask(appLicense: AppLicense) {
@@ -70,8 +67,8 @@ class MainActivity : AppCompatActivity() {
 
         // Cập nhật mật khẩu cho ứng dụng
         AppStorage.AppPassword = appLicense.AppPassword
-        Toast.makeText(this, "Mật khẩu ứng dụng là: ${appLicense.AppPassword}", Toast.LENGTH_SHORT)
-            .show()
+//        Toast.makeText(this, "Mật khẩu ứng dụng là: ${appLicense.AppPassword}", Toast.LENGTH_SHORT)
+//            .show()
 
         // Chuyển sang màn hình đăng nhập khi được hơn thời gian quy định
         goToLogin()
@@ -80,14 +77,12 @@ class MainActivity : AppCompatActivity() {
     private fun goToLogin() {
         Timer().schedule(object : TimerTask() {
             override fun run() {
-                if (System.currentTimeMillis() - startLoadMilis > 1000) {
-                    this.cancel()
-                    val intent = Intent(this@MainActivity, LoginActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                }
+                this.cancel()
+                val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                startActivity(intent)
+                finish()
             }
-        }, 100)
+        }, 1000)
     }
 
     // Phương thức điều hướng sang màn hình yêu cầu quyền
