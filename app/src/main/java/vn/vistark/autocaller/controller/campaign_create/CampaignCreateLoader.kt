@@ -10,7 +10,7 @@ import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.views.campaign_create.CampaignCreateActivity
 
 
-class CountDataRecordLoader(val context: CampaignCreateActivity, val uri: Uri?) :
+class CampaignCreateLoader(val context: CampaignCreateActivity, val uri: Uri?) :
     LoaderManager.LoaderCallbacks<Int> {
 
 
@@ -26,7 +26,7 @@ class CountDataRecordLoader(val context: CampaignCreateActivity, val uri: Uri?) 
         )
     }
 
-    fun getPath(uri: Uri?): String? {
+    private fun getPath(uri: Uri?): String? {
         val projection =
             arrayOf(MediaStore.Images.Media.DATA)
         val cursor: Cursor? =
@@ -43,14 +43,19 @@ class CountDataRecordLoader(val context: CampaignCreateActivity, val uri: Uri?) 
     }
 
     override fun onLoadFinished(loader: Loader<Int>, data: Int) {
-        if (data == -1) {
-            Toasty.error(context, "Nhập dữ liệu thất bại", Toasty.LENGTH_SHORT, true).show()
-        } else if (data == -1) {
-            Toasty.error(context, "Không tìm thấy tệp tin", Toasty.LENGTH_SHORT, true).show()
-        } else {
-            context.showSuccess(data.toLong())
+        when (data) {
+            -1 -> {
+                Toasty.error(context, "Nhập dữ liệu thất bại", Toasty.LENGTH_SHORT, true).show()
+            }
+            -2 -> {
+                Toasty.error(context, "Không tìm thấy tệp tin", Toasty.LENGTH_SHORT, true).show()
+            }
+            else -> {
+                context.showSuccess(data.toLong())
+            }
         }
     }
+
 
     override fun onLoaderReset(loader: Loader<Int>) {
     }

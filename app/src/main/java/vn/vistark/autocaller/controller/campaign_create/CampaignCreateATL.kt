@@ -1,7 +1,6 @@
 package vn.vistark.autocaller.controller.campaign_create
 
 import androidx.loader.content.AsyncTaskLoader
-import cn.pedant.SweetAlert.SweetAlertDialog
 import kotlinx.android.synthetic.main.activity_campaign_create.*
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.PhoneCallState
@@ -20,10 +19,19 @@ class CampaignCreateATL(val context: CampaignCreateActivity, private val path: S
     // Biến chứa số bản ghi upload thành công
     var successCount = 0
 
-    override fun onStartLoading() {
-        forceLoad()
+    init {
         // Hiện loading
         context.showLoading()
+        onContentChanged()
+    }
+
+    override fun onStartLoading() {
+        if (takeContentChanged())
+            forceLoad()
+    }
+
+    override fun onStopLoading() {
+        cancelLoad()
     }
 
     override fun loadInBackground(): Int {
@@ -55,19 +63,13 @@ class CampaignCreateATL(val context: CampaignCreateActivity, private val path: S
                     false
                 )
 
-            // Lưu dữ liệu
-            context.campaignItemName.post {
-                campaignData.id = campaignRepository.add(campaignData).toInt()
-            }
-
-            // Nếu thành công, đếm
-            if (campaignData.id > 0) {
-                println("Nhập số $phoneNumber thành công!")
+            // Lưu dữ liệu và đếm nếu thành công
+            if (campaignRepository.add(campaignData).toInt() > 0)
                 successCount++
-            } else
-                println("Nhập số $phoneNumber KHÔNG thành công!")
+
             context.updateProgressState(campaignData, 1 + processCount++)
         }
+        // Đóng bộ đọc file
         r.close()
 
         // Cập nhập tổng số SĐT đã import vào danh mục

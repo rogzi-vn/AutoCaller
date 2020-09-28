@@ -1,11 +1,9 @@
 package vn.vistark.autocaller.views.campaign_create
 
-import android.R.attr
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
@@ -18,12 +16,10 @@ import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_campaign_create.*
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign_create.CampaignCreateController
-import vn.vistark.autocaller.controller.campaign_create.CountDataRecordLoader
+import vn.vistark.autocaller.controller.campaign_create.CampaignCreateLoader
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignRepository
-import vn.vistark.autocaller.utils.FileUtils
-import java.util.*
 
 
 // Animation: https://stackoverflow.com/questions/6796139/fade-in-fade-out-android-animation-in-java
@@ -134,7 +130,7 @@ class CampaignCreateActivity : AppCompatActivity() {
                     return
                 }
                 // Bắt đầu trình đếm
-                CountDataRecordLoader(this@CampaignCreateActivity, dataUri)
+                CampaignCreateLoader(this@CampaignCreateActivity, dataUri)
             }
 
             override fun onAnimationStart(p0: Animation?) {
@@ -254,30 +250,38 @@ class CampaignCreateActivity : AppCompatActivity() {
     }
 
     fun showSuccess(count: Long) {
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                if (loading == null || !loading!!.isShowing) {
-                    this.cancel()
-                    campaignItemName.post {
-                        val success = SweetAlertDialog(
-                            this@CampaignCreateActivity,
-                            SweetAlertDialog.SUCCESS_TYPE
-                        )
-                            .setTitleText("Nhập dữ liệu hoàn tất")
-                            .setContentText("$count/${totalLines}")
-                            .setConfirmText("Xem danh sách")
-                            .showCancelButton(false)
-                            .setConfirmClickListener { sDialog -> finishWithSuccess() }
-                        success.setCancelable(false)
-                        success.show()
-                    }
-                }
+        Toasty.success(this, "$count").show()
+        campaignItemName.post {
+            if (loading != null && loading!!.isShowing) {
+                loading!!.dismissWithAnimation()
+                loading!!.cancel()
+                loading = null
             }
-        }, 500)
+            loading = SweetAlertDialog(
+                this@CampaignCreateActivity,
+                SweetAlertDialog.SUCCESS_TYPE
+            )
+                .setTitleText("Nhập dữ liệu hoàn tất")
+                .setContentText("$count/${totalLines}")
+                .setConfirmText("Xem danh sách")
+                .showCancelButton(false)
+                .setConfirmClickListener { sDialog ->
+                    sDialog.dismissWithAnimation()
+                    sDialog.cancel()
+                    finishWithSuccess()
+                }
+            loading?.setCancelable(false)
+            loading?.show()
+        }
     }
 
     fun showLoading() {
         campaignItemName.post {
+            if (loading != null && loading!!.isShowing) {
+                loading!!.dismiss()
+                loading!!.cancel()
+                loading = null
+            }
             loading = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
                 .setTitleText("Đang tính toán tổng số bản ghi dữ liệu")
                 .setContentText("ĐANG XỬ LÝ")

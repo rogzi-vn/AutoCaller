@@ -24,8 +24,6 @@ class CampaignDataRepository(val context: AppCompatActivity) {
         contentValues.put(CampaignDataModel.INDEX_IN_CAMPAIGN, campaignDataModel.indexInCampaign)
         contentValues.put(CampaignDataModel.IS_CALLED, if (campaignDataModel.isCalled) 1 else 0)
 
-        println(Gson().toJson(contentValues))
-
         // Ghi vào db
         val res =
             instance.writableDatabase.insert(CampaignDataModel.TABLE_NAME, null, contentValues)
