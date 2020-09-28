@@ -23,7 +23,7 @@
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
             android:singleLine="true"
-            android:text="#123. Chiến dịch 14/03/1998"
+            android:text="############"
             android:textColor="#FFF"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:text="(40.000/60.000)"
+            android:text="(~/~)"
             android:textColor="#FFF"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -55,7 +55,7 @@
             android:layout_toStartOf="@id/campaignItemProgressPercent"
             android:layout_toLeftOf="@id/campaignItemProgressPercent"
             android:max="100"
-            android:progress="66" />
+            android:progress="0" />
 
         <TextView
             android:id="@+id/campaignItemProgressPercent"
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:text="66%"
+            android:text="~%"
             android:textColor="#FFF"
             android:textSize="12sp"
             android:textStyle="bold" />

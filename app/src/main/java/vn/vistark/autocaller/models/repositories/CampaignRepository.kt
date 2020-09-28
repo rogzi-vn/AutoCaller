@@ -2,6 +2,7 @@ package vn.vistark.autocaller.models.repositories
 
 import android.content.ContentValues
 import androidx.appcompat.app.AppCompatActivity
+import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.DatabaseContext
 import vn.vistark.autocaller.utils.getInt
@@ -50,6 +51,61 @@ class CampaignRepository(val context: AppCompatActivity) {
         instance.readableDatabase.close()
 
         return res.toLong()
+    }
+
+    fun getLimit(lastCampaignId: Int, limit: Long): Array<CampaignModel> {
+
+        // Khai báo biến chứa danh sách
+        val campaigns = ArrayList<CampaignModel>()
+
+        // Lấy con trỏ
+        val cursor = instance.readableDatabase.query(
+            true,
+            CampaignModel.TABLE_NAME,
+            null,
+            "${CampaignModel.ID} > ?",
+            arrayOf(lastCampaignId.toString()),
+            null,
+            null,
+            "${CampaignModel.ID} ASC",
+            limit.toString()
+        )
+
+        // Nếu không có bản ghi
+        if (!cursor.moveToFirst()) {
+            cursor.close()
+            return campaigns.toTypedArray()
+        }
+
+        // Còn có thì tiến hành duyệt
+        do {
+            try {
+                // Gán dữ liệu vào đối tượng
+                val campaign = CampaignModel(
+                    cursor.getInt(CampaignModel.ID),
+                    cursor.getString(CampaignModel.NAME),
+                    cursor.getInt(CampaignModel.LAST_PHONE_ID),
+                    cursor.getInt(CampaignModel.TOTAL_IMPORTED),
+                    cursor.getInt(CampaignModel.TOTAL_CALLED),
+                    cursor.getInt(CampaignModel.TOTAL_FAIL)
+                )
+                // Theeo vào danh sách lưu trữ
+                campaigns.add(campaign)
+            } catch (e: Exception) {
+                // Sự đời khó lường trước
+                e.printStackTrace()
+            }
+
+        } while (cursor.moveToNext())
+
+        // Đóng con trỏ
+        cursor.close()
+
+        // Đóng trình đọc
+        instance.readableDatabase.close()
+
+        // Trả về dữ liệu
+        return campaigns.toTypedArray()
     }
 
     // Lấy danh sách các chiến dịch đã có - sắp sếp theo id giảm dần (Mới hơn ở trên)
@@ -106,6 +162,66 @@ class CampaignRepository(val context: AppCompatActivity) {
 
         // Trả về dữ liệu
         return campaigns.toTypedArray()
+    }
+
+    fun get(id: Int): CampaignModel? {
+
+        // Lấy con trỏ
+        val cursor = instance.readableDatabase.query(
+            true,
+            CampaignModel.TABLE_NAME,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "${CampaignModel.ID} DESC",
+            null
+        )
+
+        // Nếu không có bản ghi
+        if (!cursor.moveToFirst()) {
+            cursor.close()
+            return null
+        }
+
+        // Còn có thì tiến hành duyệt
+        do {
+            try {
+                // Gán dữ liệu vào đối tượng
+                val campaign = CampaignModel(
+                    cursor.getInt(CampaignModel.ID),
+                    cursor.getString(CampaignModel.NAME),
+                    cursor.getInt(CampaignModel.LAST_PHONE_ID),
+                    cursor.getInt(CampaignModel.TOTAL_IMPORTED),
+                    cursor.getInt(CampaignModel.TOTAL_CALLED),
+                    cursor.getInt(CampaignModel.TOTAL_FAIL)
+                )
+                // Đóng con trỏ
+                cursor.close()
+                // Đóng đọc
+                instance.readableDatabase.close()
+                // Trả về
+                return campaign
+            } catch (e: Exception) {
+                // Sự đời khó lường trước
+                e.printStackTrace()
+            } finally {
+                // Đóng con trỏ
+                cursor.close()
+                instance.readableDatabase.close()
+            }
+
+        } while (cursor.moveToNext())
+
+        // Đóng con trỏ
+        cursor.close()
+
+        // Đóng trình đọc
+        instance.readableDatabase.close()
+
+        // Trả về dữ liệu
+        return null
     }
 
     // Cập nhật
