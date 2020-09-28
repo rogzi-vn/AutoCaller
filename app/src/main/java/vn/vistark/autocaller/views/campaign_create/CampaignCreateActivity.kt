@@ -250,7 +250,6 @@ class CampaignCreateActivity : AppCompatActivity() {
     }
 
     fun showSuccess(count: Long) {
-        Toasty.success(this, "$count").show()
         campaignItemName.post {
             if (loading != null && loading!!.isShowing) {
                 loading!!.dismissWithAnimation()

@@ -1,8 +1,10 @@
 package vn.vistark.autocaller.views.campaign
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -10,6 +12,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_campaign.*
 import vn.vistark.autocaller.R
@@ -34,6 +37,9 @@ class CampaignActivity : AppCompatActivity() {
         // Khởi tạo adapter
         adapter = CampaignAdapter(campaigns)
 
+        // Sự kiện nhấn giữ adapter
+        removeCampaignEvent()
+
         // Khởi tạo RecyclerView để chứa danh sách
         campaignRvList.layoutManager = LinearLayoutManager(this)
         campaignRvList.setHasFixedSize(true)
@@ -41,6 +47,26 @@ class CampaignActivity : AppCompatActivity() {
 
         // Tiến hành load dữ liệu
         CampaignLoader(this)
+    }
+
+    private fun removeCampaignEvent() {
+        adapter.onLongClick = { campaign ->
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Bạn có muốn xóa chiến dịch này cùng dữ liệu liên quan?")
+                .setContentText("XÓA CHIẾN DỊCH")
+                .showCancelButton(true)
+                .setCancelButton("Không xóa") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                }
+                .setConfirmButton("Xóa") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                    removeCampaign(campaign)
+                }
+                .show()
+
+        }
     }
 
     // Khởi tạo và chèn menu vào thanh ứng dụng ở trên, bên phải
@@ -70,9 +96,31 @@ class CampaignActivity : AppCompatActivity() {
     // Phương thức cập nhật, thêm mới chiến dịch vào danh sách
     fun addCampaign(campaignModel: CampaignModel) {
         campaignRvList.visibility = View.VISIBLE
-        println("Đã thêm ${campaignModel.name}")
         campaigns.add(campaignModel)
         adapter.notifyDataSetChanged()
+        updateCount()
+    }
+
+    fun removeCampaign(campaignModel: CampaignModel) {
+        val res = CampaignRepository(this).remove(campaignModel.id.toLong())
+        if (res <= 0) {
+            Toasty.error(this, "Xóa chiến dịch không thành công", Toasty.LENGTH_SHORT, true)
+                .show()
+        } else {
+            val index = campaigns.indexOfFirst { it.id == campaignModel.id }
+            if (index < 0) {
+                return
+            }
+            campaigns.removeAt(index)
+            adapter.notifyDataSetChanged()
+            updateCount()
+            Toasty.success(this, "Xóa chiến dịch thành công", Toasty.LENGTH_SHORT, true).show()
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun updateCount() {
+        campaignTvCount.text = "Danh sách chiến dịch đã tạo (${campaigns.size})"
     }
 
     // Phương thức cho chạy loading

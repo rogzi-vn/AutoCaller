@@ -1,21 +1,37 @@
 package vn.vistark.autocaller.views.campaign
 
 import android.annotation.SuppressLint
+import android.view.ContextMenu
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.CampaignModel
+import vn.vistark.autocaller.models.repositories.CampaignRepository
 
 class CampaignViewHolder(val v: View) : RecyclerView.ViewHolder(v) {
-    val campaignItemName: TextView = v.findViewById(R.id.campaignItemName)
-    val campaignItemProgressCount: TextView = v.findViewById(R.id.campaignItemProgressCount)
-    val campaignItemProgressBar: ProgressBar = v.findViewById(R.id.campaignItemProgressBar)
-    val campaignItemProgressPercent: TextView = v.findViewById(R.id.campaignItemProgressPercent)
+    val cItemLnRoot: LinearLayout = v.findViewById(R.id.cItemLnRoot)
+    private val campaignItemName: TextView = v.findViewById(R.id.campaignItemName)
+    private val campaignItemProgressCount: TextView = v.findViewById(R.id.campaignItemProgressCount)
+    private val campaignItemProgressBar: ProgressBar = v.findViewById(R.id.campaignItemProgressBar)
+    private val campaignItemProgressPercent: TextView =
+        v.findViewById(R.id.campaignItemProgressPercent)
+
+    // Lưu lại dữ liệu được gán
+    var campaignModel: CampaignModel? = null
 
     @SuppressLint("SetTextI18n")
     fun bind(campaignModel: CampaignModel) {
+
+        // Cập nhật lưu trữ
+        this.campaignModel = campaignModel
+
+        // Hiển thị
         campaignItemName.post {
             campaignItemName.text = campaignModel.name
             campaignItemProgressCount.text =
