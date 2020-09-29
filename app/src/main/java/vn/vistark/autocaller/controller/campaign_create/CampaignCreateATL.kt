@@ -1,20 +1,25 @@
 package vn.vistark.autocaller.controller.campaign_create
 
+import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
 import androidx.loader.content.AsyncTaskLoader
 import kotlinx.android.synthetic.main.activity_campaign_create.*
 import vn.vistark.autocaller.models.CampaignDataModel
+import vn.vistark.autocaller.models.DatabaseContext
 import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.views.campaign_create.CampaignCreateActivity
 import java.io.BufferedReader
 import java.io.FileReader
+import java.io.InputStreamReader
+import java.io.Reader
 
-class CampaignCreateATL(val context: CampaignCreateActivity, private val path: String) :
+class CampaignCreateATL(val context: CampaignCreateActivity, private val uri: Uri?) :
     AsyncTaskLoader<Int>(context) {
 
     // Kho
-    val campaignRepository = CampaignDataRepository(context)
+    val db = DatabaseContext(context).writableDatabase
 
     // Biến chứa số bản ghi upload thành công
     var successCount = 0
@@ -36,7 +41,7 @@ class CampaignCreateATL(val context: CampaignCreateActivity, private val path: S
 
     override fun loadInBackground(): Int {
         // Nếu path trống
-        if (path.isEmpty())
+        if (uri == null)
             return -1
 
         // Đếm tổng số records
@@ -47,10 +52,13 @@ class CampaignCreateATL(val context: CampaignCreateActivity, private val path: S
     }
 
     private fun importAllRecords(): Int {
-        val r = BufferedReader(FileReader(path))
+        val inpReader = InputStreamReader(context.contentResolver.openInputStream(uri!!))
+        val r = BufferedReader(inpReader)
         var phoneNumber: String?
         var index = 0
         var processCount = 0L
+
+        db.beginTransaction()
         while (r.readLine().also { phoneNumber = it } != null) {
             // Khởi tạo dữ liệu
             val campaignData =
@@ -63,14 +71,38 @@ class CampaignCreateATL(val context: CampaignCreateActivity, private val path: S
                     false
                 )
 
+            // Tạo bộ dữ liệu nhập
+            val values = CampaignDataRepository.createDataValues(campaignData)
+
             // Lưu dữ liệu và đếm nếu thành công
-            if (campaignRepository.add(campaignData).toInt() > 0)
+//            db.insert(CampaignDataModel.TABLE_NAME, null,values)
+
+            // Gọi phương thức nhập chung
+            if (db.insertWithOnConflict(
+                    CampaignDataModel.TABLE_NAME,
+                    null,
+                    values,
+                    SQLiteDatabase.CONFLICT_IGNORE
+                ) > 0
+            )
                 successCount++
 
             context.updateProgressState(campaignData, 1 + processCount++)
         }
         // Đóng bộ đọc file
         r.close()
+
+        // Đóng input stream reader
+        inpReader.close()
+
+        // Thông báo là transact đã thành công
+        db.setTransactionSuccessful()
+
+        // Kết thúc transact
+        db.endTransaction()
+
+        // Đóng database lại
+        db.close()
 
         // Cập nhập tổng số SĐT đã import vào danh mục
         context.campaign.totalImported = successCount
@@ -82,11 +114,14 @@ class CampaignCreateATL(val context: CampaignCreateActivity, private val path: S
     }
 
     private fun countTotalRecords() {
+        val inpReader = InputStreamReader(context.contentResolver.openInputStream(uri!!))
         // Đếm tổng số bản ghi
-        val reader = BufferedReader(FileReader(path))
+        val reader = BufferedReader(inpReader)
         var lines = 0
         while (reader.readLine() != null) lines++
         reader.close()
+
+        inpReader.close()
 
         // Lưu vào context
         context.totalLines = lines.toLong()

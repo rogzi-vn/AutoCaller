@@ -25,6 +25,9 @@ import vn.vistark.autocaller.models.repositories.CampaignRepository
 // Animation: https://stackoverflow.com/questions/6796139/fade-in-fade-out-android-animation-in-java
 
 class CampaignCreateActivity : AppCompatActivity() {
+    // Biến nhận loader
+    var campaignCreateLoader: CampaignCreateLoader? = null
+
     // Biến chứa địa chỉ tệp mà người dùng đã chọn
     private var dataUri: Uri? = null
 
@@ -88,7 +91,11 @@ class CampaignCreateActivity : AppCompatActivity() {
                 .setConfirmText("Vẫn hủy")
                 .showCancelButton(true)
                 .setCancelClickListener { sDialog -> sDialog.cancel() }
-                .setConfirmClickListener { sDialog -> Toasty.success(this, "Ahihi").show() }
+                .setConfirmClickListener { sDialog ->
+                    sDialog.dismissWithAnimation()
+                    sDialog.cancel()
+                    campaignCreateLoader?.campaignCreateATL?.cancelLoadInBackground()
+                }
                 .show()
         }
     }
@@ -130,7 +137,7 @@ class CampaignCreateActivity : AppCompatActivity() {
                     return
                 }
                 // Bắt đầu trình đếm
-                CampaignCreateLoader(this@CampaignCreateActivity, dataUri)
+                campaignCreateLoader = CampaignCreateLoader(this@CampaignCreateActivity, dataUri)
             }
 
             override fun onAnimationStart(p0: Animation?) {
@@ -162,6 +169,12 @@ class CampaignCreateActivity : AppCompatActivity() {
         })
 
         campaignSrvPickLayout.startAnimation(fadeOut)
+    }
+
+    // Ẩn phần tiếp độ nhập và hiển thị phần chọn file
+    private fun showPickerAgain() {
+        campaignSrvPickLayout.visibility = View.VISIBLE
+        campaignRlImportLayout.visibility = View.GONE
     }
 
     //region Các phương thức dành cho phần chọn tệp dữ liệu
@@ -199,7 +212,6 @@ class CampaignCreateActivity : AppCompatActivity() {
 
     //endregion
 
-
     // Khi nhấn nút trở về
     override fun onSupportNavigateUp(): Boolean {
         if (campaignRlImportLayout.visibility == View.VISIBLE)
@@ -214,10 +226,9 @@ class CampaignCreateActivity : AppCompatActivity() {
 
         // Nếu là yêu cầu pick file của app và thành công
         if (requestCode == PICK_DATA_FILE && resultCode == Activity.RESULT_OK) {
-            if (data == null) {
-                Toasty.error(this, "Chọn tệp không thành công", Toasty.LENGTH_SHORT, true).show()
+            if (data == null)
                 return
-            }
+
             // Lưu uri
             dataUri = data.data
 
@@ -225,17 +236,13 @@ class CampaignCreateActivity : AppCompatActivity() {
             campaignCreateEdtDataPath.setText(dataUri?.path ?: "Đã chọn thành công")
             // Mở khóa nút confirm
             loginEdtConfirmButton.isEnabled = true
-            // Hiển thị thông báo
-            Toasty.success(this, "Đã chọn tệp dữ liệu thành công", Toasty.LENGTH_SHORT, true).show()
             // Trở lên
             return
         }
 
         // Nếu là yêu cầu pick file của app nhưng lại không thành công
-        if (requestCode == PICK_DATA_FILE && resultCode != Activity.RESULT_OK) {
-            Toasty.error(this, "Bỏ qua chọn dữ liệu", Toasty.LENGTH_SHORT, true).show()
+        if (requestCode == PICK_DATA_FILE && resultCode != Activity.RESULT_OK)
             return
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -249,13 +256,17 @@ class CampaignCreateActivity : AppCompatActivity() {
         }
     }
 
+    fun cancelLoading() {
+        if (loading != null && loading!!.isShowing) {
+            loading!!.dismissWithAnimation()
+            loading!!.cancel()
+            loading = null
+        }
+    }
+
     fun showSuccess(count: Long) {
         campaignItemName.post {
-            if (loading != null && loading!!.isShowing) {
-                loading!!.dismissWithAnimation()
-                loading!!.cancel()
-                loading = null
-            }
+            cancelLoading()
             loading = SweetAlertDialog(
                 this@CampaignCreateActivity,
                 SweetAlertDialog.SUCCESS_TYPE
@@ -276,11 +287,7 @@ class CampaignCreateActivity : AppCompatActivity() {
 
     fun showLoading() {
         campaignItemName.post {
-            if (loading != null && loading!!.isShowing) {
-                loading!!.dismiss()
-                loading!!.cancel()
-                loading = null
-            }
+            cancelLoading()
             loading = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
                 .setTitleText("Đang tính toán tổng số bản ghi dữ liệu")
                 .setContentText("ĐANG XỬ LÝ")
@@ -294,17 +301,32 @@ class CampaignCreateActivity : AppCompatActivity() {
 
     fun hideLoading() {
         campaignItemName.post {
-            if (loading?.isShowing == true) {
-                loading?.dismissWithAnimation()
-                loading?.cancel()
-            }
+            cancelLoading()
         }
     }
 
-    fun finishWithSuccess() {
+    private fun finishWithSuccess() {
         val dataIntent = Intent()
         dataIntent.putExtra(CampaignModel.ID, campaign.id)
         setResult(Activity.RESULT_OK, dataIntent)
         finish()
+    }
+
+    fun importFail(msgError: String = "Nhập dữ liệu không được, vui lòng thử lại hoặc tìm một tập dữ liệu khác thay thể") {
+        // Đóng loading
+        cancelLoading()
+
+        // Hiển thị lại phần chọn file
+        showPickerAgain()
+
+        // Thông báo lỗi
+        SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+            .setTitleText(msgError)
+            .setContentText("NHẬP THẤT BẠI")
+            .showCancelButton(true)
+            .setCancelButton("Đóng") { sDialog ->
+                sDialog.dismissWithAnimation()
+                sDialog.cancel()
+            }.show()
     }
 }

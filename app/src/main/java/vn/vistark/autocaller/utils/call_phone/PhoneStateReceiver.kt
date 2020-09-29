@@ -11,11 +11,13 @@ import java.util.*
 
 // https://stackoverflow.com/questions/9684866/how-to-detect-when-phone-is-answered-or-rejected
 class PhoneStateReceiver : BroadcastReceiver() {
-    // Kiểm tra xem đây có phải lầ đầu chạy lại không
-    var isFirstRun = true
+    companion object {
+        const val NAME = "PhoneStateReceiver"
+        const val INCOMMING_CALL = "INCOMMING_CALL"
 
-    // Biến lưu trữ trạng thái trước đó
-    var previousState = TelephonyManager.EXTRA_STATE_IDLE
+        // Biến lưu trữ trạng thái trước đó
+        var previousState = "EXTRA_STATE_IDLE"
+    }
 
     // Biến lưu giữ Timer
     var timer: Timer? = null
@@ -28,27 +30,42 @@ class PhoneStateReceiver : BroadcastReceiver() {
         if (intent.action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
             when (intent.getStringExtra(TelephonyManager.EXTRA_STATE)) {
                 TelephonyManager.EXTRA_STATE_IDLE -> {
+                    println("$previousState >> EXTRA_STATE_IDLE")
+
+                    // Nếu trạng thái trước đó là mình gọi, và bây giờ đã kết thúc
+                    if (previousState == "EXTRA_STATE_OFFHOOK") {
+                        // Gửi thông báo
+                        context.sendBroadcast(Intent(NAME))
+                    }
+
                     // Làm mới trạng thái hiện tại
-                    previousState = TelephonyManager.EXTRA_STATE_IDLE
+                    previousState = "EXTRA_STATE_IDLE"
                 }
                 TelephonyManager.EXTRA_STATE_RINGING -> {
+                    println("$previousState >> EXTRA_STATE_RINGING")
                     // Làm mới trạng thái hiện tại
-                    previousState = TelephonyManager.EXTRA_STATE_RINGING
+                    previousState = "EXTRA_STATE_RINGING"
+                    // Gửi thông báo có cuộc gọi đến
+                    context.sendBroadcast(Intent(INCOMMING_CALL))
                 }
                 TelephonyManager.EXTRA_STATE_OFFHOOK -> {
+                    println("$previousState >> EXTRA_STATE_OFFHOOK")
                     // Nếu trước đó đang là trạng thái nghỉ
-                    if (previousState == TelephonyManager.EXTRA_STATE_IDLE)
+                    if (previousState == "EXTRA_STATE_IDLE")
                         KillCallTimer(context)
 
                     // Làm mới trạng thái hiện tại
-                    previousState = TelephonyManager.EXTRA_STATE_OFFHOOK
+                    previousState = "EXTRA_STATE_OFFHOOK"
+                }
+                else -> {
+
                 }
             }
         } else {
+            println("$previousState >> EXTRA_STATE_IDLE")
             previousState = TelephonyManager.EXTRA_STATE_IDLE
         }
 
-        isFirstRun = false
     }
 
     private fun KillCallTimer(context: Context) {

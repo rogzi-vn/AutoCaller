@@ -2,26 +2,22 @@ package vn.vistark.autocaller.views.campaign
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Application
 import android.content.Intent
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_campaign.*
 import vn.vistark.autocaller.R
-import vn.vistark.autocaller.controller.campaign.CampaignController
 import vn.vistark.autocaller.controller.campaign.CampaignLoader
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignRepository
-import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
 import vn.vistark.autocaller.views.campaign_create.CampaignCreateActivity
+import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
 
 class CampaignActivity : AppCompatActivity() {
     // Nơi chứa dữ liệu danh sách các chiến dịch
@@ -34,8 +30,14 @@ class CampaignActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_campaign)
 
+        // Ẩn thanh loading tải danh sách chiến dịch
+        hideLoading()
+
         // Khởi tạo adapter
         adapter = CampaignAdapter(campaigns)
+
+        // Sự kiện xem thông tin khi nhấn vào adapter
+        showDetailEvent()
 
         // Sự kiện nhấn giữ adapter
         removeCampaignEvent()
@@ -47,6 +49,16 @@ class CampaignActivity : AppCompatActivity() {
 
         // Tiến hành load dữ liệu
         CampaignLoader(this)
+    }
+
+    private fun showDetailEvent() {
+        adapter.onClick = { campaign ->
+            val intent = Intent(this, CampaignDetailActivity::class.java)
+            intent.putExtra(CampaignModel.ID, campaign.id)
+            startActivity(intent)
+            /// Đóng activity hiện tại cho nhẹ
+            finish()
+        }
     }
 
     private fun removeCampaignEvent() {
@@ -95,10 +107,13 @@ class CampaignActivity : AppCompatActivity() {
 
     // Phương thức cập nhật, thêm mới chiến dịch vào danh sách
     fun addCampaign(campaignModel: CampaignModel) {
-        campaignRvList.visibility = View.VISIBLE
         campaigns.add(campaignModel)
-        adapter.notifyDataSetChanged()
-        updateCount()
+        runOnUiThread {
+            if (campaignRvList.visibility != View.VISIBLE)
+                campaignRvList.visibility = View.VISIBLE
+            adapter.notifyDataSetChanged()
+            updateCount()
+        }
     }
 
     fun removeCampaign(campaignModel: CampaignModel) {
@@ -125,16 +140,12 @@ class CampaignActivity : AppCompatActivity() {
 
     // Phương thức cho chạy loading
     fun showLoading() {
-        campaignPbLoading.post {
-            campaignPbLoading.visibility = View.VISIBLE
-        }
+        campaignPbLoading.visibility = View.VISIBLE
     }
 
     // Phương thức cho ẩn loading
     fun hideLoading() {
-        campaignPbLoading.post {
-            campaignPbLoading.visibility = View.GONE
-        }
+        campaignPbLoading.visibility = View.GONE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -157,35 +168,4 @@ class CampaignActivity : AppCompatActivity() {
         }
     }
 
-//    private fun checkPhoneAndCall() {
-//        // lấy số người dùng nhập
-//        val inpPhone = campaignEdtPhone.text.toString()
-//
-//        // Nếu không đủ 10 số
-//        if (inpPhone.length < 10) {
-//            // Thông báo
-//            Toasty.error(
-//                this,
-//                "Số điện thoại quá ngắn.",
-//                Toasty.LENGTH_SHORT,
-//                true
-//            ).show()
-//            return
-//        }
-//
-//        // Nếu chưa nhập
-//        if (inpPhone.isEmpty()) {
-//            // Thông báo
-//            Toasty.error(
-//                this,
-//                "Bạn chưa nhập số điện thoại.",
-//                Toasty.LENGTH_SHORT,
-//                true
-//            ).show()
-//            return
-//        }
-//
-//        // Sau khi OK, tiến hành gọi
-//        PhoneCallUtils.startCall(this, inpPhone)
-//    }
 }

@@ -32,7 +32,6 @@ class CampaignATL(val context: CampaignActivity) : AsyncTaskLoader<Boolean>(cont
 
             // Có thì lấy ID của phần tử cuối cùng
             lastCampaignId = campaigns.last().id
-            println(">>>>>>>>>>>> ID CUỐI $lastCampaignId")
 
             // Lặp và thêm vào ds hiển tị
             campaigns.forEach { campaign ->

@@ -74,6 +74,7 @@ class CampaignRepository(val context: AppCompatActivity) {
         // Nếu không có bản ghi
         if (!cursor.moveToFirst()) {
             cursor.close()
+            instance.readableDatabase.close()
             return campaigns.toTypedArray()
         }
 
@@ -130,6 +131,7 @@ class CampaignRepository(val context: AppCompatActivity) {
         // Nếu không có bản ghi
         if (!cursor.moveToFirst()) {
             cursor.close()
+            instance.readableDatabase.close()
             return campaigns.toTypedArray()
         }
 

@@ -27,5 +27,7 @@ class PhoneCallUtils {
             intent.data = Uri.parse("tel:${number}")
             context.startActivity(intent)
         }
+
+
     }
 }
