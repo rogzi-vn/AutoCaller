@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.CountDownTimer
 import android.telephony.TelephonyManager
+import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
 import java.lang.reflect.Method
@@ -121,8 +122,12 @@ class PhoneStateReceiver : BroadcastReceiver() {
             // Invoke endCall()
             methodEndCall.invoke(telephonyInterface)
         } catch (ex: Exception) { // Many things can go wrong with reflection calls
-            ex.printStackTrace()
-            return killCall(context)
+            Toasty.error(
+                context,
+                "Ứng dụng không thể can thiệp vào hệ thống để ngưng cuộc gọi",
+                Toasty.LENGTH_SHORT
+            ).show()
+            return false
         }
         return true
     }

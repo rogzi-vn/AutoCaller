@@ -363,11 +363,12 @@ class CampaignDetailActivity : AppCompatActivity() {
             // Renew trạng thái
             PhoneStateReceiver.previousState = "EXTRA_STATE_IDLE"
 
-            //  Bắt đầu cuộc gọi tiếp theo sau 2s
+            //  Bắt đầu cuộc gọi tiếp theo sau DelayTimeInSeconds
             Timer().schedule(object : TimerTask() {
                 override fun run() {
                     this.cancel()
-                    CampaignCall.start(this@CampaignDetailActivity, campaign!!.id)
+                    if (isStartCampaign || isStopTemporarily)
+                        CampaignCall.start(this@CampaignDetailActivity, campaign!!.id)
                 }
             }, AppStorage.DelayTimeInSeconds * 1000L)
         }

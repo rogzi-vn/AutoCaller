@@ -16,6 +16,7 @@ class PermissionUtils {
             val permissions = ArrayList<String>()
             permissions.add(Manifest.permission.CALL_PHONE)
             permissions.add(Manifest.permission.READ_PHONE_STATE)
+//            permissions.add(Manifest.permission.MODIFY_PHONE_STATE)
             permissions.add(Manifest.permission.INTERNET)
             permissions.add(Manifest.permission.ACCESS_WIFI_STATE)
             permissions.add(Manifest.permission.ACCESS_NETWORK_STATE)
