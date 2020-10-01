@@ -145,7 +145,9 @@ class CampaignActivity : AppCompatActivity() {
 
     // Phương thức cho ẩn loading
     fun hideLoading() {
-        campaignPbLoading.visibility = View.GONE
+        campaignPbLoading.post {
+            campaignPbLoading.visibility = View.GONE
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -24,8 +24,19 @@ class CampaignDataDetailViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         cDataPhoneNumber.text = "#$index. ${campaignViewDataModel.phone}"
 
         // Đếu đã gọi thì gạch ngang số
-        if (campaignViewDataModel.isCalled)
-            cDataPhoneNumber.paintFlags = cDataPhoneNumber.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+//        if (campaignViewDataModel.isCalled)
+//        {
+////            cDataPhoneNumber.paintFlags = cDataPhoneNumber.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+////            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+////                cDataPhoneNumber.setTextColor(
+////                    cDataPhoneNumber.resources.getColor(R.color.colorSecondary, null)
+////                )
+////            } else {
+////                cDataPhoneNumber.setTextColor(
+////                    cDataPhoneNumber.resources.getColor(R.color.colorSecondary)
+////                )
+////            }
+//        }
 
         // Đặt màu cho trạng thái
         setState(campaignViewDataModel.callState)
@@ -41,6 +52,8 @@ class CampaignDataDetailViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
         when (state) {
             PhoneCallState.CALLED -> {
+//                cDataPhoneNumber.paintFlags =
+//                    cDataPhoneNumber.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 colorId = R.color.successColor
                 stateString = "Đã gọi"
             }

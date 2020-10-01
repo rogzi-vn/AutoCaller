@@ -43,8 +43,10 @@ class PhoneStateReceiver : BroadcastReceiver() {
                 }
                 TelephonyManager.EXTRA_STATE_RINGING -> {
                     println("$previousState >> EXTRA_STATE_RINGING")
+
                     // Làm mới trạng thái hiện tại
                     previousState = "EXTRA_STATE_RINGING"
+
                     // Gửi thông báo có cuộc gọi đến
                     context.sendBroadcast(Intent(INCOMMING_CALL))
                 }

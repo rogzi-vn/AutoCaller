@@ -258,6 +258,7 @@ class CampaignDetailActivity : AppCompatActivity() {
     // Broad cast khi thực hiện nhá máy
     var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            println("NHẬN ĐƯỢC SỰ KIỆN TỪ BROADCAST GỌI")
             // Cập nhật vào CSDL
             if (CampaignCall.currentCampaignData != null) {
                 CampaignCall.currentCampaignData!!.callState = PhoneCallState.CALLED
@@ -278,6 +279,7 @@ class CampaignDetailActivity : AppCompatActivity() {
             //  Bắt đầu cuộc gọi tiếp theo sau 2s
             Timer().schedule(object : TimerTask() {
                 override fun run() {
+                    println("TIMER >>>>")
                     this.cancel()
                     CampaignCall.start(this@CampaignDetailActivity, campaign!!.id)
                 }

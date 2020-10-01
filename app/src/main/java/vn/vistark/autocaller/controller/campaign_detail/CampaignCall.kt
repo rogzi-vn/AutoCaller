@@ -61,6 +61,8 @@ class CampaignCall {
             // Lưu tạm
             currentCampaignData = phone
 
+            println(">>>>>> GỌI")
+
             // Gọi
             PhoneCallUtils.startCall(context, phone.phone!!)
         }

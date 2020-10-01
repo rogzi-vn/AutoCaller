@@ -1,0 +1,58 @@
+<html>
+
+<head>
+    <title>Tạo danh sách số điện thoại không trùng lắp</title>
+</head>
+
+<body>
+    <input type="number" id="number" value="100">
+    <button type="button" id="button">Tạo</button>
+
+    <div>DANH SÁCH ĐÃ TẠO</div>
+    <ul id="phone-list">
+
+    </div>
+
+    <script>
+        var phones = [];
+
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+        function generatePhone() {
+            let phone = `0${getRndInteger(100000000, 999999999)}`;
+            return phone;
+        }
+
+        function phoneWizar(number) {
+            for (let i = 0; i < number; i++) {
+                let phone = generatePhone();
+                if (!phones.includes(phone)) {
+                    phones.push(phone);
+                    // Tạo node li
+                    var node = document.createElement("LI");
+                    // Tạo text node
+                    let textnode = document.createTextNode(phone);
+                    // Nhập textnode vào li
+                    node.appendChild(textnode);
+                    // Thêm vào
+                    document.getElementById("phone-list").appendChild(node);
+                }
+            }
+        }
+
+        function createEvent() {
+            var number = document.getElementById("number").value;
+            if (number < 0 || number > 500000) {
+                alert("Số lượng không hợp lệ (0~500.000)");
+                return;
+            }
+            phoneWizar(parseInt(number));
+        }
+
+        document.getElementById("button").onclick = function () { createEvent() };
+    </script>
+</body>
+
+</html>
