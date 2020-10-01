@@ -43,5 +43,27 @@ class AppStorage {
                     putInt("LoginFail", count)
                 }?.apply()
             }
+
+        // Thời gian delay sau mỗi cuộc gọi, đơn vị tính bằng giây
+        var DelayTimeInSeconds: Int
+            get() {
+                return SPUtils.sp?.getInt("DelayTimeInSeconds", 10) ?: 10
+            }
+            set(value) {
+                SPUtils.sp?.edit()?.apply {
+                    putInt("DelayTimeInSeconds", value)
+                }?.apply()
+            }
+
+        // Thời gian thực hiện mỗi cuộc gọi
+        var DelayTimeCallInSeconds: Int
+            get() {
+                return SPUtils.sp?.getInt("DelayTimeCallInSeconds", 6) ?: 6
+            }
+            set(value) {
+                SPUtils.sp?.edit()?.apply {
+                    putInt("DelayTimeCallInSeconds", value)
+                }?.apply()
+            }
     }
 }

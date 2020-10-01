@@ -7,4 +7,9 @@
         android:orderInCategory="0"
         android:title="Tạo chiến dịch mới"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/trMenuSetting"
+        android:icon="@drawable/settings"
+        android:orderInCategory="0"
+        android:title="Thiết lập" />
 </menu>

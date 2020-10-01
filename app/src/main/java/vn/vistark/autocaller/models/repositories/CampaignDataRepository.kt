@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.DatabaseContext
+import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.utils.getBoolean
 import vn.vistark.autocaller.utils.getInt
 import vn.vistark.autocaller.utils.getString
@@ -98,6 +99,29 @@ class CampaignDataRepository(val context: AppCompatActivity) {
 
         // Trả về dữ liệu
         return campaignDatas.toTypedArray()
+    }
+
+    // Thiết lập các tham trị quay về mặc định như ban đầu cho tất cả các bộ dữ liệu thuộc 1 chiến dịch
+    fun reset(campaignId: Int): Int {
+        // Xây dựng bộ dữ liệu
+        val contentValues = ContentValues()
+        contentValues.put(CampaignDataModel.CALL_STATE, PhoneCallState.NOT_CALL)
+        contentValues.put(CampaignDataModel.IS_CALLED, 0)
+
+        // Ghi vào db
+        val res =
+            instance.writableDatabase.update(
+                CampaignDataModel.TABLE_NAME,
+                contentValues,
+                "${CampaignDataModel.CAMPAIGN_ID}=?",
+                arrayOf(campaignId.toString())
+            )
+
+        // Đóng CSDL lại
+        instance.writableDatabase.close()
+
+        // Trả về kết quả
+        return res
     }
 
     // Cập nhật, KQ: Số dòng chịu tác động

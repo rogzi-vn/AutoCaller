@@ -19,6 +19,10 @@
         <item name="android:textColorHint">#9d9d9d</item>
     </style>
 
+    <style name="EditText.Default.NoPadding" parent="EditText.Default">
+        <item name="android:padding">@null</item>
+    </style>
+
     <style name="BlockNotifier" parent="Widget.AppCompat.TextView">
         <item name="android:background">@drawable/textview_default</item>
         <item name="android:textColor">#721c24</item>

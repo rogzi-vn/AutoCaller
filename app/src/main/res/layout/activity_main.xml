@@ -18,13 +18,6 @@
             android:layout_height="wrap_content"
             android:src="@drawable/logo" />
 
-        <!--        <androidx.appcompat.widget.AppCompatImageView-->
-        <!--            android:id="@+id/loadingIcon"-->
-        <!--            android:layout_width="80dp"-->
-        <!--            android:layout_height="80dp"-->
-        <!--            android:layout_gravity="center"-->
-        <!--            android:layout_marginTop="20dp"-->
-        <!--            android:src="@drawable/loading_ring" />-->
         <ProgressBar
             android:layout_width="50dp"
             android:layout_height="50dp"

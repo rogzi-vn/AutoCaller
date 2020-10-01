@@ -17,6 +17,9 @@ class PermissionHelperActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_permission_helper)
 
+        // Thiết lập tiêu đề
+        supportActionBar?.title = "Yêu cầu quyền hoạt động"
+
         // Khởi tạo đối tượng điều khiển màn hình thông báo khóa
         blockNotifier = BlockNotifier(window.decorView.rootView)
 

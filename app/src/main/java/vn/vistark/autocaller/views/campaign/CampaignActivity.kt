@@ -18,6 +18,7 @@ import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.views.campaign_create.CampaignCreateActivity
 import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
+import vn.vistark.autocaller.views.setting.SettingActivity
 
 class CampaignActivity : AppCompatActivity() {
     // Nơi chứa dữ liệu danh sách các chiến dịch
@@ -92,6 +93,9 @@ class CampaignActivity : AppCompatActivity() {
             R.id.trMenuAddCampaign -> {
                 return createNewCampaign()
             }
+            R.id.trMenuSetting -> {
+                return settingApp()
+            }
             else -> {
                 Toasty.error(this, "Không tìm thấy tùy chọn này", Toasty.LENGTH_SHORT, true).show()
             }
@@ -99,6 +103,15 @@ class CampaignActivity : AppCompatActivity() {
         return false
     }
 
+
+    // Khởi động màn hình thiết lập
+    private fun settingApp(): Boolean {
+        val intent = Intent(this, SettingActivity::class.java)
+        startActivity(intent)
+        return true
+    }
+
+    // Khởi động màn hình tạo mới chiến dịch
     private fun createNewCampaign(): Boolean {
         val intent = Intent(this, CampaignCreateActivity::class.java)
         startActivityForResult(intent, CampaignCreateActivity.REQUEST_CODE)
@@ -116,7 +129,7 @@ class CampaignActivity : AppCompatActivity() {
         }
     }
 
-    fun removeCampaign(campaignModel: CampaignModel) {
+    private fun removeCampaign(campaignModel: CampaignModel) {
         val res = CampaignRepository(this).remove(campaignModel.id.toLong())
         if (res <= 0) {
             Toasty.error(this, "Xóa chiến dịch không thành công", Toasty.LENGTH_SHORT, true)

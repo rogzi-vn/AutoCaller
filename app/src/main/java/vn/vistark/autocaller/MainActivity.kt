@@ -39,11 +39,11 @@ class MainActivity : AppCompatActivity() {
             return // quai lại
         }
 
-        // Kiểm tra mạng internet
-        if (!this.isConnected) {
-            blockNotifier?.show("Vui lòng kiểm tra lại kết nối mạng của bạn")
-            return
-        }
+//        // Kiểm tra mạng internet
+//        if (!this.isConnected) {
+//            blockNotifier?.show("Vui lòng kiểm tra lại kết nối mạng của bạn")
+//            return
+//        }
 
         // Nếu đăng nhập sai quá số lần quy định, lock app
         if (AppStorage.LoginFail > AppStorage.MAX_LOGIN_FAIL) {

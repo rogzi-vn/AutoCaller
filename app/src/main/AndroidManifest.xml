@@ -23,7 +23,8 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:icon"
         tools:targetApi="m">
-        <activity android:name=".views.campaign_detail.CampaignDetailActivity"></activity>
+        <activity android:name=".views.setting.SettingActivity"></activity>
+        <activity android:name=".views.campaign_detail.CampaignDetailActivity" />
         <activity android:name=".views.campaign_create.CampaignCreateActivity" />
 
         <receiver android:name=".utils.call_phone.PhoneStateReceiver">

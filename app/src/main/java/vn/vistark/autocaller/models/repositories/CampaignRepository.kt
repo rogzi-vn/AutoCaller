@@ -259,4 +259,24 @@ class CampaignRepository(val context: AppCompatActivity) {
         instance.writableDatabase.close()
         return res
     }
+
+    fun reset(id: Int): Int {
+        // Xây dựng bộ dữ liệu
+        val contentValues = ContentValues()
+        contentValues.put(CampaignModel.LAST_PHONE_ID, 0)
+        contentValues.put(CampaignModel.TOTAL_CALLED, 0)
+        contentValues.put(CampaignModel.TOTAL_FAIL, 0)
+
+        // Ghi vào db
+        val res = instance.writableDatabase.update(
+            CampaignModel.TABLE_NAME, contentValues, "${CampaignModel.ID}=?",
+            arrayOf(id.toString())
+        )
+
+        // Đóng CSDL lại
+        instance.writableDatabase.close()
+
+        // Trả về kết quả
+        return res
+    }
 }

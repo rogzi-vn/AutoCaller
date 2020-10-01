@@ -256,7 +256,7 @@ class CampaignCreateActivity : AppCompatActivity() {
         }
     }
 
-    fun cancelLoading() {
+    private fun cancelLoading() {
         if (loading != null && loading!!.isShowing) {
             loading!!.dismissWithAnimation()
             loading!!.cancel()
