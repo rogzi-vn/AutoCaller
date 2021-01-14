@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".views.campaign_create.CampaignCreateActivity">
+    tools:context=".views.campaign_update.CampaignUpdateActivity">
 
     <ScrollView
         android:id="@+id/campaignSrvPickLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
         <!-- Giao diện phần chọn file dữ liệu -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -23,7 +23,7 @@
                 android:id="@+id/campaignTvCreateName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tên chiến dịch (Tự động tạo)"
+                android:text="Tên chiến dịch (#1)"
                 android:textColor="#000"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -41,14 +41,30 @@
                 android:inputType="text"
                 android:singleLine="true" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="Đường dẫn tệp dữ liệu (*.txt)"
-                android:textColor="#000"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:layout_marginTop="15dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đường dẫn tệp dữ liệu (*.txt)"
+                    android:textColor="#000"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/acuTvClearImportFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="Xóa"
+                    android:textColor="#F00"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -69,7 +85,7 @@
                     android:ellipsize="middle"
                     android:enabled="false"
                     android:focusable="false"
-                    android:hint="Nhấp để chọn dữ liệu"
+                    android:hint="Nhấp chọn dữ liệu thêm"
                     android:inputType="none"
                     android:singleLine="true" />
 
@@ -94,7 +110,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:enabled="false"
-                android:text="Tải dữ liệu &amp; tạo chiến dịch"
+                android:text="Tải dữ liệu &amp; cập nhật chiến dịch"
                 android:textAllCaps="true" />
         </LinearLayout>
         <!-- End giao diện phần chọn file dữ liệu -->

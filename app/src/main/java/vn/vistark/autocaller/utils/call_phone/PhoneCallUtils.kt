@@ -22,8 +22,6 @@ class PhoneCallUtils {
                 )
             }
 
-            println("89898988989")
-
             // Tiến hành gọi
             val intent = Intent(Intent.ACTION_CALL)
             intent.data = Uri.parse("tel:${number}")

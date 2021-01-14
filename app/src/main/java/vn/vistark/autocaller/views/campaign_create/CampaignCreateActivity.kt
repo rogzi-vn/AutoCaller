@@ -40,6 +40,9 @@ class CampaignCreateActivity : AppCompatActivity() {
     // Khởi tạo hộp thoại loading
     var loading: SweetAlertDialog? = null
 
+    // Lưu mã của chiến dịch hiện tại, sẽ có
+    var currentCampaignId = -1L
+
     companion object {
         // Mã yêu cầu khi khởi động màn hình này
         const val REQUEST_CODE = 5454
@@ -65,8 +68,15 @@ class CampaignCreateActivity : AppCompatActivity() {
         // Thiết lập các view (Kích thước,....)
         initViewSetUp()
 
+        // Lấy mã cho chiến dịch hiện tại
+        currentCampaignId = CampaignRepository(this).getMaxId() + 1L
+
+        // Tự động lấy ID tiếp theo cho chiến dịch
+        campaignTvCreateName.setText("Tên chiến dịch (#$currentCampaignId)")
+
         // Tự động tạo tên cho tên chiến dịch
-        campaignEdtCreateName.setText(CampaignCreateController.generateCampaignName(this))
+        campaignEdtCreateName.setText(CampaignCreateController.generateCampaignName())
+        campaignEdtCreateName.isEnabled = true
 
         // Khởi tạo sụ kiện nhấn để chọn tệp tin
         initPickDataFileEvents()
@@ -101,7 +111,7 @@ class CampaignCreateActivity : AppCompatActivity() {
     }
 
     private fun initConfirmEvents() {
-        loginEdtConfirmButton.setOnClickListener {
+        loginBtnConfirmButton.setOnClickListener {
             if (dataUri != null)
             // Thực hiện animation thu nhỏ phần chọn file
                 fadeOutPicker()
@@ -235,7 +245,7 @@ class CampaignCreateActivity : AppCompatActivity() {
             // Cập nhật đường dẫn vào TextBox
             campaignCreateEdtDataPath.setText(dataUri?.path ?: "Đã chọn thành công")
             // Mở khóa nút confirm
-            loginEdtConfirmButton.isEnabled = true
+            loginBtnConfirmButton.isEnabled = true
             // Trở lên
             return
         }

@@ -34,7 +34,7 @@ class LoginActivity : AppCompatActivity() {
             ).show()
 
         // Khi nhấn vào nút xác nhận
-        loginEdtConfirmButton.setOnClickListener {
+        loginBtnConfirmButton.setOnClickListener {
             // Tiến hành kiểm tra mật khẩu
             checkPassword()
         }

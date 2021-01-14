@@ -14,7 +14,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
+import kotlinx.android.synthetic.main._campaign_item.*
 import kotlinx.android.synthetic.main.activity_campaign_create.*
+import kotlinx.android.synthetic.main.activity_campaign_create.campaignItemName
+import kotlinx.android.synthetic.main.activity_campaign_create.campaignItemProgressBar
+import kotlinx.android.synthetic.main.activity_campaign_create.campaignItemProgressCount
+import kotlinx.android.synthetic.main.activity_campaign_create.campaignItemProgressPercent
 import kotlinx.android.synthetic.main.activity_campaign_detail.*
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
@@ -28,6 +33,7 @@ import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import vn.vistark.autocaller.views.campaign.CampaignActivity
+import vn.vistark.autocaller.views.campaign_update.CampaignUpdateActivity
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
@@ -93,6 +99,9 @@ class CampaignDetailActivity : AppCompatActivity() {
         // Sự kiện khi nhấn nút tạm ngưng
         pauseBtnEvent()
 
+        // Sự kiện khi nhấn chỉnh sửa chiến dịch
+        editBtnEvent()
+
         // Load 200 record đầu
         loadMore()
 
@@ -107,6 +116,25 @@ class CampaignDetailActivity : AppCompatActivity() {
             broadcastStopTemporarilyDone,
             IntentFilter(PhoneStateReceiver.STOP_TEMPORARILY_DONE)
         )
+    }
+
+    private fun editBtnEvent() {
+        cItemLnRoot.setOnClickListener {
+            campaignTvOption.performClick()
+        }
+        campaignTvOption.setOnClickListener {
+            // Tạm ngưng việc chạy chiến dịch để thực hiện việc chỉnh sửa
+            if (acdBtnPause.isEnabled)
+                acdBtnPause.performClick()
+
+            // Khởi chạy trang chỉnh sửa
+            val intent = Intent(this, CampaignUpdateActivity::class.java)
+            intent.putExtra(CampaignModel.ID, campaign?.id ?: -1)
+            startActivity(intent)
+
+            // Kết thúc trang thông tin hiện tại cho nhẹ
+            finish()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     //
 
-    // Biến chứa thời gian khởi đầu tải
+    // Biến chứa thời gian khởi đầu tải 
     var startLoadMilis = -1L;
 
     // Đối tượng điều kiểm màn hình thông báo khóa
