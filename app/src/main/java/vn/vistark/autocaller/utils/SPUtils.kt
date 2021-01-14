@@ -8,9 +8,12 @@ import java.util.*
 class SPUtils {
     companion object {
         var sp: SharedPreferences? = null
-        fun init(context:AppCompatActivity) {
+        fun init(context: Context) {
             sp =
-                context.getSharedPreferences(context.packageName.toUpperCase(Locale.ROOT), Context.MODE_PRIVATE)
+                context.getSharedPreferences(
+                    context.packageName.toUpperCase(Locale.ROOT),
+                    Context.MODE_PRIVATE
+                )
         }
     }
 }

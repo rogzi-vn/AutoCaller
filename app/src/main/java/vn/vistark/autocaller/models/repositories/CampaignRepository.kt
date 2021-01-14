@@ -1,6 +1,7 @@
 package vn.vistark.autocaller.models.repositories
 
 import android.content.ContentValues
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.CampaignModel
@@ -8,7 +9,7 @@ import vn.vistark.autocaller.models.DatabaseContext
 import vn.vistark.autocaller.utils.getInt
 import vn.vistark.autocaller.utils.getString
 
-class CampaignRepository(val context: AppCompatActivity) {
+class CampaignRepository(val context: Context) {
     private val instance: DatabaseContext = DatabaseContext(context)
 
     // Thêm mới chiến dịch và trả về ID của chiến dịch đó (-1 là lỗi)

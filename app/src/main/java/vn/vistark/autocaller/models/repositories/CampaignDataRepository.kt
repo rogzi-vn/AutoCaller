@@ -1,6 +1,7 @@
 package vn.vistark.autocaller.models.repositories
 
 import android.content.ContentValues
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import vn.vistark.autocaller.models.CampaignDataModel
@@ -12,7 +13,7 @@ import vn.vistark.autocaller.utils.getString
 
 // https://stackoverflow.com/questions/10600670/sqlitedatabase-query-method
 
-class CampaignDataRepository(val context: AppCompatActivity) {
+class CampaignDataRepository(val context: Context) {
     private val instance: DatabaseContext = DatabaseContext(context)
 
     companion object {

@@ -7,6 +7,7 @@ import android.os.CountDownTimer
 import android.telephony.TelephonyManager
 import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.models.storages.AppStorage
+import vn.vistark.autocaller.services.BackgroundService.Companion.isStopTemporarily
 import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
 import java.lang.reflect.Method
 import java.util.*
@@ -39,7 +40,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
                     }
 
                     // Nếu trạng thái trước đó là trạng thái dừng tạm thời do có cuộc gọi đến
-                    if (previousState == "EXTRA_STATE_RINGING" || CampaignDetailActivity.isStopTemporarily) {
+                    if (previousState == "EXTRA_STATE_RINGING" || isStopTemporarily) {
                         // Gửi thông báo để tái khởi động lại chiến dịch
                         context.sendBroadcast(Intent(STOP_TEMPORARILY_DONE))
                     }

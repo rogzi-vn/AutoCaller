@@ -23,7 +23,12 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:icon"
         tools:targetApi="m">
-        <activity android:name=".views.campaign_update.CampaignUpdateActivity"></activity>
+        <service
+            android:name=".services.BackgroundService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name=".views.campaign_update.CampaignUpdateActivity" />
         <activity android:name=".views.setting.SettingActivity" />
         <activity android:name=".views.campaign_detail.CampaignDetailActivity" />
         <activity android:name=".views.campaign_create.CampaignCreateActivity" />

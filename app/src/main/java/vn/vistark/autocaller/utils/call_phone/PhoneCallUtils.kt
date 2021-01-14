@@ -1,5 +1,6 @@
 package vn.vistark.autocaller.utils.call_phone
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -9,7 +10,7 @@ import java.util.*
 
 class PhoneCallUtils {
     companion object {
-        fun startCall(context: AppCompatActivity, phoneNumber: String) {
+        fun startCall(context: Context, phoneNumber: String) {
             var number = phoneNumber
             // Chuẩn hóa số điện thoại
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

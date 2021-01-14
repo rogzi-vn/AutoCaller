@@ -31,6 +31,12 @@ import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.models.storages.AppStorage
+import vn.vistark.autocaller.services.BackgroundService
+import vn.vistark.autocaller.services.BackgroundService.Companion.IsBackgroundServiceRunning
+import vn.vistark.autocaller.services.BackgroundService.Companion.StartBackgroundService
+import vn.vistark.autocaller.services.BackgroundService.Companion.StopBackgroundService
+import vn.vistark.autocaller.services.BackgroundService.Companion.isStartCampaign
+import vn.vistark.autocaller.services.BackgroundService.Companion.isStopTemporarily
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import vn.vistark.autocaller.views.campaign.CampaignActivity
 import vn.vistark.autocaller.views.campaign_update.CampaignUpdateActivity
@@ -40,11 +46,6 @@ import kotlin.collections.ArrayList
 
 
 class CampaignDetailActivity : AppCompatActivity() {
-
-    companion object {
-        var isStopTemporarily = false
-    }
-
     var campaign: CampaignModel? = null
 
     val campaignDatas = ArrayList<CampaignDataModel>()
@@ -53,8 +54,6 @@ class CampaignDetailActivity : AppCompatActivity() {
     var lastPhoneIndex = 0
 
     lateinit var campaignDataRepository: CampaignDataRepository
-
-    var isStartCampaign = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,18 +103,6 @@ class CampaignDetailActivity : AppCompatActivity() {
 
         // Load 200 record đầu
         loadMore()
-
-        // Đăng ký broadcast khi có cuộc gọi đến để tạm ngừng chiến dịch
-        registerReceiver(
-            broadcastReceiverWhenPhoneComming,
-            IntentFilter(PhoneStateReceiver.INCOMMING_CALL)
-        )
-
-        // Đăng ký broadcast để tái khởi động chiến dịch khi cuộc gọi đến kết thúc
-        registerReceiver(
-            broadcastStopTemporarilyDone,
-            IntentFilter(PhoneStateReceiver.STOP_TEMPORARILY_DONE)
-        )
     }
 
     private fun editBtnEvent() {
@@ -158,7 +145,7 @@ class CampaignDetailActivity : AppCompatActivity() {
     }
 
     private fun confirmResetCampaign(): Boolean {
-        if (isStartCampaign || isStopTemporarily) {
+        if (IsBackgroundServiceRunning()) {
             Toasty.error(
                 this,
                 "Vui lòng TẠM NGƯNG chiến dịch trước khi thao tác",
@@ -182,10 +169,19 @@ class CampaignDetailActivity : AppCompatActivity() {
         return true
     }
 
+    private fun stopRegisReciver() {
+        try {
+            unregisterReceiver(BackgroundService.broadcastReceiver)
+        } catch (e: Exception) {
+        }
+    }
+
     fun pause(isLoadMore: Boolean = true) {
         isStartCampaign = false
         // Bỏ đăng ký nghe khi xong cuộc gọi
         stopRegisReciver()
+
+        StopBackgroundService()
 
         // Điều chỉnh view
         runOnUiThread {
@@ -209,7 +205,8 @@ class CampaignDetailActivity : AppCompatActivity() {
 
     private fun startBtnEvent() {
         acdBtnStart.setOnClickListener {
-            isStartCampaign = true
+
+            StartBackgroundService(campaign!!)
 
             acdBtnPause.isEnabled = true
             acdBtnStart.isEnabled = false
@@ -220,12 +217,12 @@ class CampaignDetailActivity : AppCompatActivity() {
             campaignDatas.clear()
             adapter.notifyDataSetChanged()
 
-            // Đăng ký nghe khi xong cuộc gọi
-            registerReceiver(broadcastReceiver, IntentFilter(PhoneStateReceiver.NAME))
-
-            // Bắt đầu cuộc gọi
-            CampaignCall.start(this, campaign!!.id)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        CampaignCall.act = this
     }
 
     @SuppressLint("SetTextI18n")
@@ -296,7 +293,6 @@ class CampaignDetailActivity : AppCompatActivity() {
 
 
     fun goBack() {
-        isStopTemporarily = false
         pause(false)
         val intent = Intent(this, CampaignActivity::class.java)
         startActivity(intent)
@@ -341,77 +337,9 @@ class CampaignDetailActivity : AppCompatActivity() {
         pause()
     }
 
-    // Broad cast khi có cuộc gọi đến
-    private var broadcastReceiverWhenPhoneComming: BroadcastReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                // Ngưng chiến dịch khi có cuộc gọi đến
-                pause()
-                // Cho biết đây chỉ là hành động ngưng tạm thời
-                isStopTemporarily = true
-            }
-        }
-
-    // Broad cast nhận lệnh tái khởi động khi cuộc gọi đến đã kết thúc
-    private var broadcastStopTemporarilyDone: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            // Tái khởi động chiến dịch sau vài giây
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    // Kết thúc timer này
-                    this.cancel()
-                    // Bấm nút tái khởi động nếu chưa được bấm
-                    if (acdBtnStart.isEnabled)
-                        acdBtnStart.performClick()
-                    // Cho biết không còn ngưng tạm thời nữa
-                    isStopTemporarily = false
-                }
-
-            }, AppStorage.DelayTimeInSeconds * 1000L)
-        }
-    }
-
-    // Broad cast khi thực hiện nhá máy
-    private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            // Cập nhật vào CSDL
-            if (CampaignCall.currentCampaignData != null) {
-                CampaignCall.currentCampaignData!!.callState = PhoneCallState.CALLED
-                CampaignCall.currentCampaignData!!.isCalled = true
-                CampaignCall.updateCallState(
-                    this@CampaignDetailActivity,
-                    campaign!!,
-                    CampaignCall.currentCampaignData!!
-                )
-            }
-
-            // Cập nhật progress
-            initCampaignData()
-
-            // Renew trạng thái
-            PhoneStateReceiver.previousState = "EXTRA_STATE_IDLE"
-
-            //  Bắt đầu cuộc gọi tiếp theo sau DelayTimeInSeconds
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    this.cancel()
-                    if (isStartCampaign || isStopTemporarily)
-                        CampaignCall.start(this@CampaignDetailActivity, campaign!!.id)
-                }
-            }, AppStorage.DelayTimeInSeconds * 1000L)
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        stopRegisReciver()
-    }
-
-    private fun stopRegisReciver() {
-        try {
-            unregisterReceiver(broadcastReceiver)
-        } catch (e: Exception) {
-        }
+        CampaignCall.act = null
     }
 
     fun successCallAllPhone() {

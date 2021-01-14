@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "vn.vistark.autocaller",
+  "variantName": "processReleaseResources",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "versionCode": 210114001,
+      "versionName": "210114-001",
+      "outputFile": "app-release.apk"
+    }
+  ]
+}

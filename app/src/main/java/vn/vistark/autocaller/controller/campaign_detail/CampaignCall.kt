@@ -1,26 +1,42 @@
 package vn.vistark.autocaller.controller.campaign_detail
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
+import android.media.MediaPlayer
+import es.dmoral.toasty.Toasty
+import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
+import vn.vistark.autocaller.services.BackgroundService.Companion.isStartCampaign
 import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
 import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
+
 
 class CampaignCall {
     companion object {
 
+        var act: CampaignDetailActivity? = null
         var currentCampaignData: CampaignDataModel? = null
 
-        fun start(context: CampaignDetailActivity, campaignId: Int) {
+        fun playAudio(context: Context, audioId: Int) {
+            val mPlayer: MediaPlayer = MediaPlayer.create(context, audioId)
+            mPlayer.start()
+        }
+
+        fun start(context: Context, campaignId: Int) {
             // Lấy chiến dịch hiện tại
             val currentCampaign = CampaignRepository(context).get(campaignId)
 
             // Nếu không có thì trả về thất bại
             if (currentCampaign == null) {
-                context.startCallFail()
+                try {
+                    playAudio(context, R.raw.khoi_dong_cuoc_goi_khong_thanh_cong)
+                    act?.startCallFail()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 return
             }
 
@@ -33,7 +49,12 @@ class CampaignCall {
 
             // Nếu không lấy được, tức là đã thành công hết
             if (phones.isEmpty()) {
-                context.successCallAllPhone()
+                try {
+                    playAudio(context, R.raw.hoan_tat_chien_dich)
+                    act?.successCallAllPhone()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 return
             }
 
@@ -41,19 +62,32 @@ class CampaignCall {
             val phone = phones.first()
 
             // Còn không, hiển thị thông tin số
-            context.updateCallingInfo(phone)
+            try {
+                act?.updateCallingInfo(phone)
+                Toasty.info(
+                    context,
+                    "ĐANG GỌI SỐ ${phone.phone}",
+                    Toasty.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
 
             // Nếu số điện thoại trống hoặc quá ngắn
             if (phone.phone == null || phone.phone!!.isEmpty()) {
                 phone.callState = PhoneCallState.PHONE_NUMBER_ERROR
 
                 // Cập nhật progress
-                context.initCampaignData()
+                try {
+                    act?.initCampaignData()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
 
                 // Cập nhật trạng thái thực hiện cuộc gọi, tăng số index lên
                 updateCallState(context, currentCampaign, phone)
                 // Gọi số tiếp theo nếu được
-                if (context.isStartCampaign)
+                if (isStartCampaign)
                     start(context, campaignId)
                 return
             }
@@ -68,7 +102,7 @@ class CampaignCall {
         }
 
         fun updateCallState(
-            context: AppCompatActivity,
+            context: Context,
             campaignModel: CampaignModel,
             campaignDataModel: CampaignDataModel
         ) {
