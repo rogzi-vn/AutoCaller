@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_campaign_detail.*
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
@@ -18,7 +17,6 @@ import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.utils.SPUtils
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
-import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
 import java.lang.Exception
 import java.util.*
 
@@ -141,7 +139,6 @@ class BackgroundService : Service() {
     // Phần khai báo liên quan đến thông báo (Notification)
     private val mNotificationChannelId = "Settings"
     private val mNotificationId = 140398
-    private lateinit var timer: Timer
 
     override fun onCreate() {
         super.onCreate()
@@ -222,20 +219,11 @@ class BackgroundService : Service() {
         return START_STICKY
     }
 
-    private fun intervalTask() {
-        timer = Timer()
-        timer.schedule(object : TimerTask() {
-            override fun run() {
-            }
-        }, 1000, PERIOD)
-    }
-
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
 
     override fun onDestroy() {
-        timer.cancel()
         super.onDestroy()
     }
 

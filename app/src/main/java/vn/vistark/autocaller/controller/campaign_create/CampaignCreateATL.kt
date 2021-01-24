@@ -3,17 +3,14 @@ package vn.vistark.autocaller.controller.campaign_create
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import androidx.loader.content.AsyncTaskLoader
-import kotlinx.android.synthetic.main.activity_campaign_create.*
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.DatabaseContext
 import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
-import vn.vistark.autocaller.views.campaign_create.CampaignCreateActivity
+import vn.vistark.autocaller.ui.campaign_create.CampaignCreateActivity
 import java.io.BufferedReader
-import java.io.FileReader
 import java.io.InputStreamReader
-import java.io.Reader
 
 class CampaignCreateATL(val context: CampaignCreateActivity, private val uri: Uri?) :
     AsyncTaskLoader<Int>(context) {

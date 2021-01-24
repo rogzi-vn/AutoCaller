@@ -8,9 +8,7 @@ import android.telephony.TelephonyManager
 import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.services.BackgroundService.Companion.isStopTemporarily
-import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
 import java.lang.reflect.Method
-import java.util.*
 
 
 // https://stackoverflow.com/questions/9684866/how-to-detect-when-phone-is-answered-or-rejected

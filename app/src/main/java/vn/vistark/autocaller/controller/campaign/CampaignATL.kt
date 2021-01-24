@@ -2,7 +2,7 @@ package vn.vistark.autocaller.controller.campaign
 
 import androidx.loader.content.AsyncTaskLoader
 import vn.vistark.autocaller.models.repositories.CampaignRepository
-import vn.vistark.autocaller.views.campaign.CampaignActivity
+import vn.vistark.autocaller.ui.campaign.CampaignActivity
 
 class CampaignATL(val context: CampaignActivity) : AsyncTaskLoader<Boolean>(context) {
     private val campaignRepository = CampaignRepository(context)

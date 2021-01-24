@@ -7,11 +7,16 @@ import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.PhoneCallState
+import vn.vistark.autocaller.models.repositories.BlackListRepository
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
+import vn.vistark.autocaller.models.storages.AppStorage
+import vn.vistark.autocaller.services.BackgroundService
+import vn.vistark.autocaller.services.BackgroundService.Companion.StartBackgroundService
 import vn.vistark.autocaller.services.BackgroundService.Companion.isStartCampaign
 import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
-import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
+import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
+import java.util.*
 
 
 class CampaignCall {
@@ -45,7 +50,8 @@ class CampaignCall {
 
             // Tiến hành lấy dữ liệu tiếp theo
             val phones =
-                CampaignDataRepository(context).getLimit(campaignId, lastCalledIndexData, 1)
+                CampaignDataRepository(context).getRandomForCall(campaignId)
+            phones.shuffle()
 
             // Nếu không lấy được, tức là đã thành công hết
             if (phones.isEmpty()) {
@@ -95,10 +101,46 @@ class CampaignCall {
             // Lưu tạm
             currentCampaignData = phone
 
-            println(">>>>>> GỌI")
+            // Kiểm tra xem số điện thoại có trong danh sách đen không, nếu có thì tiến hành bỏ qua, không gọi
+            if (BlackListRepository(context).isHavePhone(phone.phone ?: "aaaa")) {
+                // Nếu có thì tiến hành bỏ qua
+                currentCampaignData!!.callState = PhoneCallState.BLACK_LIST_IGNORED
+                currentCampaignData!!.isCalled = true
+                updateCallState(
+                    context,
+                    BackgroundService.currentCampaign!!,
+                    currentCampaignData!!
+                )
+                // Cập nhật progress
+                try {
+                    act?.initCampaignData()
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
 
-            // Gọi
-            PhoneCallUtils.startCall(context, phone.phone!!)
+                playAudio(context, R.raw.bo_qua_vi_nam_trong_danh_sach_den)
+                Toasty.warning(context, "Bỏ qua vì nằm trong danh sách đen", Toasty.LENGTH_SHORT)
+                    .show()
+
+                //  Bắt đầu cuộc gọi tiếp theo sau DelayTimeInSeconds
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        this.cancel()
+                        if (isStartCampaign || BackgroundService.isStopTemporarily)
+                            start(
+                                context,
+                                BackgroundService.currentCampaign!!.id
+                            )
+                    }
+                }, 1500L)
+
+                return
+            } else {
+                // Nếu không có, gọi
+                println(">>>>>> GỌI")
+                // Gọi
+                PhoneCallUtils.startCall(context, phone.phone!!)
+            }
         }
 
         fun updateCallState(

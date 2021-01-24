@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import cn.pedant.SweetAlert.SweetAlertDialog
-import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
+import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 
 class CampaignResetLoader(val context: CampaignDetailActivity) :
     LoaderManager.LoaderCallbacks<Boolean> {

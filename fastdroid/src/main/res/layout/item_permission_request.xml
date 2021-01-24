@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/space_sm"
+    android:paddingTop="@dimen/space_sm">
+
+    <TextView
+        android:id="@+id/iprTvPermissionName"
+        style="@style/Fastdroid.TextView.Label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        android:text="1. Quyền Truy cập thông tin vị trí" />
+
+    <TextView
+        android:id="@+id/iprTvPermissionDescription"
+        style="@style/Fastdroid.TextView.Label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:justificationMode="inter_word"
+        android:text="Cho phép ứng dụng biết được vị trí hiện tại của bạn ngay cả khi dứng dụng không còn hoạt động"
+        android:textStyle="normal"
+        tools:ignore="UnusedAttribute" />
+
+</LinearLayout>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="400dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/bg_loading_overlay"
+        android:orientation="vertical"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="10dp">
+
+        <TextView
+            android:id="@+id/dprTvTitle"
+            style="@style/Fastdroid.TextView.Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:padding="@dimen/space_sm"
+            android:singleLine="true"
+            android:text="RequestPermission" />
+
+        <include layout="@layout/fastdroid_line" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dprRvListPermissions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/space_sm" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/dprBtnDenied"
+                style="@style/Fastdroid.Button.Danger.Light"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/space_sm"
+                android:padding="@dimen/space_sm"
+                android:text="Denied" />
+
+            <Button
+                android:id="@+id/dprBtnConfirm"
+                style="@style/Fastdroid.Button.Primary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/space_sm"
+                android:text="Confirm" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

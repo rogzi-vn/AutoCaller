@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="fastDroidPrimary">#54a0ff</color>
+    <color name="fastDroidPrimaryDark">#ED0D4E8F</color>
+    <color name="fastDroidAccent">#ff9f43</color>
+
+    <color name="fastDroidPrimaryColor">#3699ff</color>
+    <color name="fastDroidPrimaryLightColor">#deebfe</color>
+    <color name="fastDroidPrimaryTextColor">#53a0f0</color>
+    <color name="fastDroidSecondaryColor">#e4e6ef</color>
+    <color name="fastDroidSuccessColor">#1bc5bd</color>
+    <color name="fastDroidDangerColor">#ee2d41</color>
+    <color name="fastDroidDangerLightColor">#ffe2e5</color>
+    <color name="fastDroidWarningColor">#ffa800</color>
+    <color name="fastDroidWarningLightColor">#FFF4DE</color>
+    <color name="fastDroidInfoColor">#8950fc</color>
+    <color name="fastDroidLightColor">#e4e6ef</color>
+    <color name="fastDroidDarkColor">#181c32</color>
+    <color name="fastDroidTextColor">#3f4254</color>
+    <color name="fastDroidLineColor">#ebedf3</color>
+    <color name="fastDroidBackgroundColor">#eef0f8</color>
+
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

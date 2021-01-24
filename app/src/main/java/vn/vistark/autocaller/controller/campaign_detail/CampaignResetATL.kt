@@ -3,7 +3,7 @@ package vn.vistark.autocaller.controller.campaign_detail
 import androidx.loader.content.AsyncTaskLoader
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
-import vn.vistark.autocaller.views.campaign_detail.CampaignDetailActivity
+import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 
 class CampaignResetATL(val context: CampaignDetailActivity) : AsyncTaskLoader<Boolean>(context) {
 

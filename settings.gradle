@@ -1,2 +1,3 @@
+include ':fastdroid'
 include ':app'
 rootProject.name = "AutoCaller"

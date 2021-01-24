@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".views.setting.SettingActivity">
+    tools:context=".ui.setting.SettingActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -113,11 +113,20 @@
             <!-- End thời gian chờ sau mỗi cuộc gọi -->
 
             <Button
+                android:id="@+id/settingBtnGotoBlacklist"
+                style="@style/Button.Danger"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="Danh sách đen"
+                android:textAllCaps="true" />
+
+            <Button
                 android:id="@+id/settingBtnConfirmSave"
                 style="@style/Button.Default"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="15dp"
                 android:text="LƯU THIẾT LẬP"
                 android:textAllCaps="true" />
         </LinearLayout>

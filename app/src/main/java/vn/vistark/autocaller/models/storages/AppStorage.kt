@@ -8,6 +8,18 @@ class AppStorage {
     companion object {
         const val MAX_LOGIN_FAIL = 5
 
+        // Đường dẫn blacklink mặc định
+        var GoogleSheetBlackLink: String
+            get() {
+                return SPUtils.sp?.getString("GoogleSheetBlackLink", null)
+                    ?: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDW6pfNStd63FdUJ61VMwk5-OetUWz_H0OAVbkjHKotKo0tvnc1nmmLNHEaAo9HkRWlJO3NIvGMKCl/pub?gid=0&single=true&output=csv"
+            }
+            set(appPassword) {
+                SPUtils.sp?.edit()?.apply {
+                    putString("GoogleSheetBlackLink", appPassword)
+                }?.apply()
+            }
+
         // Mật khẩu mặc định để truy cập ứng dụng
         var AppPassword: String
             get() {

@@ -3,14 +3,11 @@ package vn.vistark.autocaller.models
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import androidx.appcompat.app.AppCompatActivity
-import vn.vistark.autocaller.R
-import vn.vistark.autocaller.utils.ResourceUtils
 
 
 class DatabaseContext(val context: Context) : SQLiteOpenHelper(
     context,
-    DATABASE_NAME, null, 2009292
+    DATABASE_NAME, null, 2101241
 ) {
     companion object {
         const val DATABASE_NAME = "AutoCaller.db"
@@ -38,6 +35,13 @@ class DatabaseContext(val context: Context) : SQLiteOpenHelper(
                     "\t\"${CampaignDataModel.INDEX_IN_CAMPAIGN}\"\tINTEGER NOT NULL DEFAULT 0,\n" +
                     "\t\"${CampaignDataModel.IS_CALLED}\"\tINTEGER NOT NULL DEFAULT 0,\n" +
                     "\tPRIMARY KEY(\"${CampaignDataModel.ID}\" AUTOINCREMENT)\n" +
+                    ");"
+        )
+        db?.execSQL(
+            "CREATE TABLE IF NOT EXISTS \"${BlackListModel.TABLE_NAME}\" (\n" +
+                    "\t\"${BlackListModel.ID}\"\tINTEGER NOT NULL,\n" +
+                    "\t\"${BlackListModel.PHONE}\"\tTEXT NOT NULL,\n" +
+                    "\tPRIMARY KEY(\"${BlackListModel.ID}\" AUTOINCREMENT)\n" +
                     ");"
         )
     }

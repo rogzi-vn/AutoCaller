@@ -3,7 +3,7 @@ package vn.vistark.autocaller.controller.campaign
 import android.os.Bundle
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
-import vn.vistark.autocaller.views.campaign.CampaignActivity
+import vn.vistark.autocaller.ui.campaign.CampaignActivity
 
 class CampaignLoader(val context: CampaignActivity) : LoaderManager.LoaderCallbacks<Boolean> {
     var loaderManager: LoaderManager = LoaderManager.getInstance(context)

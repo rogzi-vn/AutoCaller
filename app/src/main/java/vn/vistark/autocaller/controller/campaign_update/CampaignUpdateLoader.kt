@@ -4,7 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
-import vn.vistark.autocaller.views.campaign_update.CampaignUpdateActivity
+import vn.vistark.autocaller.ui.campaign_update.CampaignUpdateActivity
 
 
 class CampaignUpdateLoader(val context: CampaignUpdateActivity, val uri: Uri?) :

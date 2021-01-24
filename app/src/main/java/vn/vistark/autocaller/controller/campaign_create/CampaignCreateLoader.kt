@@ -1,13 +1,10 @@
 package vn.vistark.autocaller.controller.campaign_create
 
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
-import es.dmoral.toasty.Toasty
-import vn.vistark.autocaller.views.campaign_create.CampaignCreateActivity
+import vn.vistark.autocaller.ui.campaign_create.CampaignCreateActivity
 
 
 class CampaignCreateLoader(val context: CampaignCreateActivity, val uri: Uri?) :

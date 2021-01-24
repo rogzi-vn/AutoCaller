@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="me.vistark.fastdroid">
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application>
+        <receiver android:name=".broadcasts.FastdroidBroadcastReceiver">
+            <intent-filter>
+                <action android:name="Fastdroid.CommonBroadcast" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

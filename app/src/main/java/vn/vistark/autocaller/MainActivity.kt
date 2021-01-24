@@ -2,14 +2,12 @@ package vn.vistark.autocaller
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import vn.vistark.autocaller.component.BlockNotifier
 import vn.vistark.autocaller.models.app_license.AppLicense
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.utils.*
-import vn.vistark.autocaller.views.campaign.CampaignActivity
-import vn.vistark.autocaller.views.login.LoginActivity
+import vn.vistark.autocaller.ui.login.LoginActivity
 import java.util.*
 
 

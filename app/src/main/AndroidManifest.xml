@@ -23,15 +23,17 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:icon"
         tools:targetApi="m">
+        <activity android:name=".ui.backlist.BlacklistActivity"></activity>
+
         <service
             android:name=".services.BackgroundService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".views.campaign_update.CampaignUpdateActivity" />
-        <activity android:name=".views.setting.SettingActivity" />
-        <activity android:name=".views.campaign_detail.CampaignDetailActivity" />
-        <activity android:name=".views.campaign_create.CampaignCreateActivity" />
+        <activity android:name=".ui.campaign_update.CampaignUpdateActivity" />
+        <activity android:name=".ui.setting.SettingActivity" />
+        <activity android:name=".ui.campaign_detail.CampaignDetailActivity" />
+        <activity android:name=".ui.campaign_create.CampaignCreateActivity" />
 
         <receiver android:name=".utils.call_phone.PhoneStateReceiver">
             <intent-filter android:priority="0">
@@ -40,10 +42,10 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".views.campaign.CampaignActivity" />
+        <activity android:name=".ui.campaign.CampaignActivity" />
         <activity android:name=".utils.PermissionHelperActivity" />
         <activity
-            android:name=".views.login.LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
             android:name=".MainActivity"
