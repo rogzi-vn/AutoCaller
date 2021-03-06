@@ -23,7 +23,10 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:icon"
         tools:targetApi="m">
-        <activity android:name=".ui.backlist.BlacklistActivity"></activity>
+        <activity android:name=".ui.service_provider_list.phone_prefixs.PhonePrefixActivity"></activity>
+        <activity android:name=".ui.service_provider_list.ServiceProviderListActivity" />
+        <activity android:name=".ui.sync_campaign_online.SyncCampaignOnline" />
+        <activity android:name=".ui.backlist.BlacklistActivity" />
 
         <service
             android:name=".services.BackgroundService"

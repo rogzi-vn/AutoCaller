@@ -17,6 +17,7 @@ import vn.vistark.autocaller.services.BackgroundService.Companion.isStartCampaig
 import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
 import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class CampaignCall {
@@ -102,7 +103,10 @@ class CampaignCall {
             currentCampaignData = phone
 
             // Kiểm tra xem số điện thoại có trong danh sách đen không, nếu có thì tiến hành bỏ qua, không gọi
-            if (BlackListRepository(context).isHavePhone(phone.phone ?: "aaaa")) {
+            val isIgnoreByBlackList =
+                BlackListRepository(context).isHavePhone(phone.phone ?: "aaaa")
+            val isIgnoreByPrefix = isIgnoreByPrefix(phone.phone ?: "aaa")
+            if (isIgnoreByBlackList || isIgnoreByPrefix) {
                 // Nếu có thì tiến hành bỏ qua
                 currentCampaignData!!.callState = PhoneCallState.BLACK_LIST_IGNORED
                 currentCampaignData!!.isCalled = true
@@ -118,9 +122,22 @@ class CampaignCall {
                     e.printStackTrace()
                 }
 
-                playAudio(context, R.raw.bo_qua_vi_nam_trong_danh_sach_den)
-                Toasty.warning(context, "Bỏ qua vì nằm trong danh sách đen", Toasty.LENGTH_SHORT)
-                    .show()
+                if (isIgnoreByBlackList) {
+                    playAudio(context, R.raw.bo_qua_vi_nam_trong_danh_sach_den)
+                    Toasty.warning(
+                        context,
+                        "Bỏ qua vì nằm trong danh sách đen",
+                        Toasty.LENGTH_SHORT
+                    )
+                        .show()
+                } else {
+                    Toasty.warning(
+                        context,
+                        "Bỏ qua vì nằm trong nhà mạng không gọi",
+                        Toasty.LENGTH_SHORT
+                    )
+                        .show()
+                }
 
                 //  Bắt đầu cuộc gọi tiếp theo sau DelayTimeInSeconds
                 Timer().schedule(object : TimerTask() {
@@ -152,6 +169,18 @@ class CampaignCall {
             campaignModel.totalCalled++
             campaignModel.lastPhoneId = campaignDataModel.id
             CampaignRepository(context).update(campaignModel)
+        }
+
+        fun isIgnoreByPrefix(phoneNumber: String): Boolean {
+            AppStorage.ServiceProviders.forEach { sp ->
+                if (sp.state) {
+                    sp.phonePrefixs.forEach { _prefix ->
+                        if (phoneNumber.startsWith(_prefix, true))
+                            return true
+                    }
+                }
+            }
+            return false
         }
     }
 }

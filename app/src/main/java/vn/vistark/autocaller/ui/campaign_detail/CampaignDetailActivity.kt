@@ -3,8 +3,10 @@ package vn.vistark.autocaller.ui.campaign_detail
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,6 +40,26 @@ import kotlin.collections.ArrayList
 
 
 class CampaignDetailActivity : AppCompatActivity() {
+    companion object {
+        val timePressButtonCancelInseconds = 3
+        fun View.setOnVeryLongClickListener(listener: () -> Unit) {
+            setOnTouchListener(object : View.OnTouchListener {
+
+                private val longClickDuration = 3 * 1000L
+                private val handler = Handler()
+
+                override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                    if (event?.action == MotionEvent.ACTION_DOWN) {
+                        handler.postDelayed({ listener.invoke() }, longClickDuration)
+                    } else if (event?.action == MotionEvent.ACTION_UP) {
+                        handler.removeCallbacksAndMessages(null)
+                    }
+                    return true
+                }
+            })
+        }
+    }
+
     var campaign: CampaignModel? = null
 
     val campaignDatas = ArrayList<CampaignDataModel>()
@@ -191,6 +213,9 @@ class CampaignDetailActivity : AppCompatActivity() {
 
     private fun pauseBtnEvent() {
         acdBtnPause.setOnClickListener {
+            Toasty.error(this, "Vui lòng nhấn giữ ${acdBtnPause} giây để ngưng")
+        }
+        acdBtnPause.setOnVeryLongClickListener {
             pause()
         }
     }

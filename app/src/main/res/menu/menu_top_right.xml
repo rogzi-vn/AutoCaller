@@ -8,6 +8,11 @@
         android:title="Tạo chiến dịch mới"
         app:showAsAction="always" />
     <item
+        android:id="@+id/trSyncCampaignOnline"
+        android:icon="@drawable/settings"
+        android:orderInCategory="0"
+        android:title="Đồng bộ chiến dịch online" />
+    <item
         android:id="@+id/trMenuSetting"
         android:icon="@drawable/settings"
         android:orderInCategory="0"

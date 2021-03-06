@@ -18,7 +18,7 @@ class LoginActivity : AppCompatActivity() {
         // Nếu người dùng đã có mật khẩu và mật khẩu ấy đúng
         if (AppStorage.UserPassword.isNotEmpty() && AppStorage.UserPassword == AppStorage.AppPassword) {
             // Thông báo đăng nhập thành công
-            Toasty.success(this, "Tự động đăng nhập thành công", Toasty.LENGTH_SHORT, true).show()
+            Toasty.success(this, "Tự động đăng nhập thành công", Toasty.LENGTH_SHORT, false).show()
             // Đến trang gọi
             gotoCampaign()
         }

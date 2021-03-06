@@ -31,6 +31,9 @@ class MainActivity : AppCompatActivity() {
         // Khởi tạo các hằng số cơ bản và bộ nhớ lưu trữ cục bộ
         SPUtils.init(this)
 
+        // Khởi tạo bộ lưu trữ shared preference mặc định
+        AppStorageManager.initialize(this)
+
         // Kiểm tra các quyền
         if (!PermissionUtils.permissionCheckAll(this)) {
             goToPermissionHelper() // Khởi động màn hình hỗ trợ quyền, kết thúc màn hình hiện tại

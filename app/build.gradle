@@ -12,8 +12,8 @@ android {
         applicationId "vn.vistark.autocaller"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 210124001
-        versionName "210124-001"
+        versionCode 210307036
+        versionName "210307-036"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

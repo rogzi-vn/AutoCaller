@@ -19,6 +19,7 @@ import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.ui.campaign_create.CampaignCreateActivity
 import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 import vn.vistark.autocaller.ui.setting.SettingActivity
+import vn.vistark.autocaller.ui.sync_campaign_online.SyncCampaignOnline
 
 class CampaignActivity : AppCompatActivity() {
     // Nơi chứa dữ liệu danh sách các chiến dịch
@@ -96,11 +97,21 @@ class CampaignActivity : AppCompatActivity() {
             R.id.trMenuSetting -> {
                 return settingApp()
             }
+            R.id.trSyncCampaignOnline -> {
+                return syncOnlineCampaign()
+            }
             else -> {
                 Toasty.error(this, "Không tìm thấy tùy chọn này", Toasty.LENGTH_SHORT, true).show()
             }
         }
         return false
+    }
+
+    private fun syncOnlineCampaign(): Boolean {
+        val intent = Intent(this, SyncCampaignOnline::class.java)
+        startActivity(intent)
+        finish()
+        return true
     }
 
 

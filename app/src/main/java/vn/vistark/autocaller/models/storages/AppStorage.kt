@@ -1,12 +1,19 @@
 package vn.vistark.autocaller.models.storages
 
 import vn.vistark.autocaller.models.app_license.AppLicense
-import vn.vistark.autocaller.models.app_license.AppState
+import vn.vistark.autocaller.ui.service_provider_list.phone_prefixs.ServiceProvider
+import vn.vistark.autocaller.utils.AppStorageManager
 import vn.vistark.autocaller.utils.SPUtils
 
 class AppStorage {
     companion object {
         const val MAX_LOGIN_FAIL = 5
+
+        var ServiceProviders: Array<ServiceProvider>
+            get() = AppStorageManager.get("ServiceProviders") ?: emptyArray()
+            set(value) {
+                AppStorageManager.update("ServiceProviders", value)
+            }
 
         // Đường dẫn blacklink mặc định
         var GoogleSheetBlackLink: String
@@ -17,6 +24,17 @@ class AppStorage {
             set(appPassword) {
                 SPUtils.sp?.edit()?.apply {
                     putString("GoogleSheetBlackLink", appPassword)
+                }?.apply()
+            }
+
+        var GoogleSheetCampaigns: String
+            get() {
+                return SPUtils.sp?.getString("GoogleSheetCampaigns", null)
+                    ?: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDW6pfNStd63FdUJ61VMwk5-OetUWz_H0OAVbkjHKotKo0tvnc1nmmLNHEaAo9HkRWlJO3NIvGMKCl/pub?gid=1776004578&single=true&output=csv"
+            }
+            set(appPassword) {
+                SPUtils.sp?.edit()?.apply {
+                    putString("GoogleSheetCampaigns", appPassword)
                 }?.apply()
             }
 
@@ -41,6 +59,18 @@ class AppStorage {
             set(appPassword) {
                 SPUtils.sp?.edit()?.apply {
                     putString("UserPassword", appPassword)
+                }?.apply()
+            }
+
+        // Bật tắt chế độ tắt máy ngay khi người dùng trả lời
+        var IsHangUpAsSoonAsUserAnswer: Boolean
+            get() {
+                return SPUtils.sp?.getBoolean("IsHangUpAsSoonAsUserAnswer", true)
+                    ?: true
+            }
+            set(count) {
+                SPUtils.sp?.edit()?.apply {
+                    putBoolean("IsHangUpAsSoonAsUserAnswer", count)
                 }?.apply()
             }
 

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    tools:context=".ui.sync_campaign_online.SyncCampaignOnline">
+
+    <LinearLayout
+        android:id="@+id/lnInputDataSheetUri"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/abTvImportTypeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="Đường dẫn đến sheet dữ liệu"
+            android:textColor="#000"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/dataLink"
+            style="@style/EditText.Default"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:hint="Đường dẫn đến sheet dữ liệu"
+            android:inputType="text"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/confirmBtn"
+            style="@style/Button.Default"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:enabled="false"
+            android:text="Đồng bộ chiến dịch trực tuyến"
+            android:textAllCaps="true" />
+    </LinearLayout>
+    <!-- Giao diện phần load dữ liệu -->
+    <RelativeLayout
+        android:id="@+id/blacklistRlImportLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <TextView
+            android:id="@+id/campaignLnImportLayoutTvHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tiến độ nhập liệu cho danh sách đen"
+            android:textColor="#000"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- Phần hiển thị tiến độ -->
+        <LinearLayout
+            android:id="@+id/campaignCreateLnProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/campaignLnImportLayoutTvHint"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/btn_default"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/blacklistItemName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/campaignItemProgressCount"
+                    android:layout_toLeftOf="@id/campaignItemProgressCount"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:singleLine="true"
+                    android:text="Đang nhập số: ~"
+                    android:textColor="#FFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/campaignItemProgressCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:text="(~/~)"
+                    android:textColor="#FFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ProgressBar
+                    android:id="@+id/campaignItemProgressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_toStartOf="@id/campaignItemProgressPercent"
+                    android:layout_toLeftOf="@id/campaignItemProgressPercent"
+                    android:progress="0" />
+
+                <TextView
+                    android:id="@+id/campaignItemProgressPercent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:text="~%"
+                    android:textColor="#FFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+        </LinearLayout>
+        <!-- End phần hiển thị tiến độ -->
+
+        <TextView
+            android:id="@+id/ssfdfdffdfaf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/campaignCreateLnProgress"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="Vui lòng không tắt hay thoát ứng dụng khi đang nhập dữ liệu"
+            android:textColor="#F00"
+            android:textSize="12sp"
+            android:textStyle="italic" />
+
+<!--        <Button-->
+        <!--            android:id="@+id/blacklistBtnCancel"-->
+        <!--            style="@style/Button.Danger"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_alignParentBottom="true"-->
+        <!--            android:layout_marginTop="10dp"-->
+        <!--            android:text="Hủy bỏ nhập dữ liệu"-->
+        <!--            android:textAllCaps="true" />-->
+    </RelativeLayout>
+    <!-- End giao diện phần load dữ liệu -->
+</LinearLayout>

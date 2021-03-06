@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.main.activity_setting.*
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.ui.backlist.BlacklistActivity
+import vn.vistark.autocaller.ui.service_provider_list.ServiceProviderListActivity
 
 class SettingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +26,12 @@ class SettingActivity : AppCompatActivity() {
         settingEdtTimerDelay.setText(AppStorage.DelayTimeInSeconds.toString())
         settingEdtTimerCallIn.setText(AppStorage.DelayTimeCallInSeconds.toString())
 
+        scHangUpAsSoonAs.isChecked = AppStorage.IsHangUpAsSoonAsUserAnswer
+
+        scHangUpAsSoonAs.setOnClickListener {
+            AppStorage.IsHangUpAsSoonAsUserAnswer = scHangUpAsSoonAs.isChecked
+        }
+
         // Đặt sự kiện lưu lại thiết lập
         settingBtnConfirmSave.setOnClickListener {
             saveSettingChange()
@@ -32,6 +39,11 @@ class SettingActivity : AppCompatActivity() {
 
         settingBtnGotoBlacklist.setOnClickListener {
             val intent = Intent(this, BlacklistActivity::class.java)
+            startActivity(intent)
+        }
+
+        settingServicesProvider.setOnClickListener {
+            val intent = Intent(this, ServiceProviderListActivity::class.java)
             startActivity(intent)
         }
     }

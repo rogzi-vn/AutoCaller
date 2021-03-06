@@ -112,6 +112,31 @@
             </LinearLayout>
             <!-- End thời gian chờ sau mỗi cuộc gọi -->
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"
+                    android:text="Ngắt cuộc gọi ngay khi nhấc máy"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/scHangUpAsSoonAs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
             <Button
                 android:id="@+id/settingBtnGotoBlacklist"
                 style="@style/Button.Danger"
@@ -119,6 +144,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:text="Danh sách đen"
+                android:textAllCaps="true" />
+
+            <Button
+                android:id="@+id/settingServicesProvider"
+                style="@style/Button.Warning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Bỏ gọi theo nhà mạng"
                 android:textAllCaps="true" />
 
             <Button

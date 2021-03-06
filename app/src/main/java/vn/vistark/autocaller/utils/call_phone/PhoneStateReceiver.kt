@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.CountDownTimer
 import android.telephony.TelephonyManager
+import android.util.Log
 import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.services.BackgroundService.Companion.isStopTemporarily
@@ -45,6 +46,8 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
                     // Làm mới trạng thái hiện tại
                     previousState = "EXTRA_STATE_IDLE"
+
+                    Log.w("PHONE_STATE", "IDLE")
                 }
                 TelephonyManager.EXTRA_STATE_RINGING -> {
 
@@ -53,6 +56,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
                     // Gửi thông báo có cuộc gọi đến
                     context.sendBroadcast(Intent(INCOMMING_CALL))
+                    Log.w("PHONE_STATE", "RING")
                 }
                 TelephonyManager.EXTRA_STATE_OFFHOOK -> {
 
@@ -62,9 +66,10 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
                     // Làm mới trạng thái hiện tại
                     previousState = "EXTRA_STATE_OFFHOOK"
+                    Log.w("PHONE_STATE", "OFF_HOOK")
                 }
                 else -> {
-
+                    Log.w("PHONE_STATE", "OTHER")
                 }
             }
         } else {
@@ -76,24 +81,36 @@ class PhoneStateReceiver : BroadcastReceiver() {
     }
 
     private fun KillCallTimer(context: Context) {
-        // Thời gian chờ
-        var timeDelay = AppStorage.DelayTimeCallInSeconds * 1000L + 380L
+        if (AppStorage.IsHangUpAsSoonAsUserAnswer) {
+            println("READY KILL =>")
+            // Đếm ngược
+            object : CountDownTimer(1500, 750) {
+                override fun onTick(millisUntilFinished: Long) {}
+                override fun onFinish() {
+                    // Kết thúc cuộc gọi ngay lập tức
+                    killCall(context)
+                }
+            }.start()
+        } else {
+            // Thời gian chờ
+            var timeDelay = AppStorage.DelayTimeCallInSeconds * 1000L + 380L
 
-        // Nếu không phải lần đầu, +1s
-        if (!isFirstTime) {
-            timeDelay += 1450
-            isFirstTime = false
-        }
-
-        println("READY KILL =>")
-        // Đếm ngược
-        object : CountDownTimer(timeDelay, 750) {
-            override fun onTick(millisUntilFinished: Long) {}
-            override fun onFinish() {
-                // Kết thúc cuộc gọi ngay lập tức
-                killCall(context)
+            // Nếu không phải lần đầu, +1s
+            if (!isFirstTime) {
+                timeDelay += 1450
+                isFirstTime = false
             }
-        }.start()
+
+            println("READY KILL =>")
+            // Đếm ngược
+            object : CountDownTimer(timeDelay, 750) {
+                override fun onTick(millisUntilFinished: Long) {}
+                override fun onFinish() {
+                    // Kết thúc cuộc gọi ngay lập tức
+                    killCall(context)
+                }
+            }.start()
+        }
     }
 
     private fun killCall(context: Context): Boolean {
