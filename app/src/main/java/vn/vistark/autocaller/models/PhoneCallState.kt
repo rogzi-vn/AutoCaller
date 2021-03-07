@@ -8,5 +8,6 @@ class PhoneCallState {
         const val HANG_ON = 3
         const val PHONE_NUMBER_ERROR = 4
         const val BLACK_LIST_IGNORED = 5
+        const val SERVICE_PROVIDER_IGNORED = 6
     }
 }

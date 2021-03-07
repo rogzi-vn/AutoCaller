@@ -19,6 +19,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_sync_campaign_online.*
 import vn.vistark.autocaller.R
+import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.DatabaseContext
@@ -180,7 +181,6 @@ class SyncCampaignOnline : AppCompatActivity() {
                         } else {
                             val phoneNumbers = it.split(regexCommandDetect)
                             for (i in phoneNumbers.indices) {
-                                Log.w(">> PHONE_NUMBER", phoneNumbers[i])
                                 if ("\\d{8,12}".toRegex()
                                         .matches(phoneNumbers[i].trim()) && i < onlineCampaigns.size
                                 ) {
@@ -255,7 +255,6 @@ class SyncCampaignOnline : AppCompatActivity() {
                 }
 
                 updateProgressState(phoneNumber, 1 + currentLines++)
-                println("Current records: ${currentLines}")
             }
 
             // Cập nhập tổng số SĐT đã import vào danh mục
@@ -277,13 +276,14 @@ class SyncCampaignOnline : AppCompatActivity() {
         }
 
         blacklistItemName.post {
+            CampaignCall.playAudio(this, R.raw.dong_bo_chien_dich_thanh_con)
             loading = SweetAlertDialog(
                 this,
                 SweetAlertDialog.SUCCESS_TYPE
             )
                 .setTitleText("Nhập dữ liệu hoàn tất")
                 .setContentText("$successLineCount/${totalLines}")
-                .setConfirmText("Xem danh sách")
+                .setConfirmText("Quay lại")
                 .showCancelButton(false)
                 .setConfirmClickListener { sDialog ->
                     sDialog.dismissWithAnimation()

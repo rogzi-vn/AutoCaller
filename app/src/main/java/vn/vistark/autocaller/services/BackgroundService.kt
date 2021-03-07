@@ -52,7 +52,6 @@ class BackgroundService : Service() {
                     broadcastReceiver = null
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
             }
 
             isStartCampaign = false
@@ -73,7 +72,6 @@ class BackgroundService : Service() {
                     broadcastReceiver = null
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
             }
 
             currentCampaign = campaign
@@ -181,14 +179,6 @@ class BackgroundService : Service() {
         // C. Tiến hành chạy Forefround (chạy dưới nền)
         startForeground(mNotificationId, notification)
 
-        // Thực hiện các tác vụ tại đây
-        try {
-            // Đăng ký broadcast khi có cuộc gọi đến để tạm ngừng chiến dịch
-            unregisterReceiver(broadcastReceiverWhenPhoneComming)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
         try {
             // Đăng ký broadcast khi có cuộc gọi đến để tạm ngừng chiến dịch
             registerReceiver(
@@ -199,12 +189,7 @@ class BackgroundService : Service() {
             e.printStackTrace()
         }
 
-        try {
-            // Đăng ký broadcast để tái khởi động chiến dịch khi cuộc gọi đến kết thúc
-            unregisterReceiver(broadcastStopTemporarilyDone)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+
 
         try {
             // Đăng ký broadcast để tái khởi động chiến dịch khi cuộc gọi đến kết thúc
@@ -224,6 +209,7 @@ class BackgroundService : Service() {
     }
 
     override fun onDestroy() {
+        stopRegisReciver()
         super.onDestroy()
     }
 
@@ -271,6 +257,21 @@ class BackgroundService : Service() {
         try {
             unregisterReceiver(broadcastReceiver)
         } catch (e: Exception) {
+        }
+
+        // Thực hiện các tác vụ tại đây
+        try {
+            // Hủy Đăng ký broadcast khi có cuộc gọi đến để tạm ngừng chiến dịch
+            unregisterReceiver(broadcastReceiverWhenPhoneComming)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        try {
+            // Hủy Đăng ký broadcast để tái khởi động chiến dịch khi cuộc gọi đến kết thúc
+            unregisterReceiver(broadcastStopTemporarilyDone)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

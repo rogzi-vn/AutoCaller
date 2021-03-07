@@ -49,6 +49,10 @@ class CampaignDataDetailViewHolder(v: View) : RecyclerView.ViewHolder(v) {
                 colorId = R.color.colorDanger
                 stateString = "DS.Đen"
             }
+            PhoneCallState.SERVICE_PROVIDER_IGNORED -> {
+                colorId = R.color.colorWarning
+                stateString = "DS.Mạng"
+            }
             else -> {
                 colorId = R.color.colorSecondary
                 stateString = "Chưa gọi"

@@ -40,25 +40,6 @@ import kotlin.collections.ArrayList
 
 
 class CampaignDetailActivity : AppCompatActivity() {
-    companion object {
-        val timePressButtonCancelInseconds = 3
-        fun View.setOnVeryLongClickListener(listener: () -> Unit) {
-            setOnTouchListener(object : View.OnTouchListener {
-
-                private val longClickDuration = 3 * 1000L
-                private val handler = Handler()
-
-                override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                    if (event?.action == MotionEvent.ACTION_DOWN) {
-                        handler.postDelayed({ listener.invoke() }, longClickDuration)
-                    } else if (event?.action == MotionEvent.ACTION_UP) {
-                        handler.removeCallbacksAndMessages(null)
-                    }
-                    return true
-                }
-            })
-        }
-    }
 
     var campaign: CampaignModel? = null
 
@@ -213,10 +194,19 @@ class CampaignDetailActivity : AppCompatActivity() {
 
     private fun pauseBtnEvent() {
         acdBtnPause.setOnClickListener {
-            Toasty.error(this, "Vui lòng nhấn giữ ${acdBtnPause} giây để ngưng")
-        }
-        acdBtnPause.setOnVeryLongClickListener {
-            pause()
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Bạn có thực sự muốn dừng chiến dịch hiện tại?")
+                .setContentText("DỪNG CHIẾN DỊCH")
+                .setCancelText("Quay lại")
+                .setConfirmText("Dừng ngay")
+                .showCancelButton(true)
+                .setCancelClickListener { sDialog -> sDialog.cancel() }
+                .setConfirmClickListener { sDialog ->
+                    sDialog.dismissWithAnimation()
+                    sDialog.cancel()
+                    pause()
+                }
+                .show()
         }
     }
 

@@ -81,36 +81,37 @@ class PhoneStateReceiver : BroadcastReceiver() {
     }
 
     private fun KillCallTimer(context: Context) {
-        if (AppStorage.IsHangUpAsSoonAsUserAnswer) {
-            println("READY KILL =>")
-            // Đếm ngược
-            object : CountDownTimer(1500, 750) {
-                override fun onTick(millisUntilFinished: Long) {}
-                override fun onFinish() {
-                    // Kết thúc cuộc gọi ngay lập tức
-                    killCall(context)
-                }
-            }.start()
-        } else {
-            // Thời gian chờ
-            var timeDelay = AppStorage.DelayTimeCallInSeconds * 1000L + 380L
+        // Thời gian chờ
+        var timeDelay = AppStorage.DelayTimeCallInSeconds * 1000L + 380L
 
-            // Nếu không phải lần đầu, +1s
-            if (!isFirstTime) {
-                timeDelay += 1450
-                isFirstTime = false
-            }
-
-            println("READY KILL =>")
-            // Đếm ngược
-            object : CountDownTimer(timeDelay, 750) {
-                override fun onTick(millisUntilFinished: Long) {}
-                override fun onFinish() {
-                    // Kết thúc cuộc gọi ngay lập tức
-                    killCall(context)
-                }
-            }.start()
+        // Nếu không phải lần đầu, +1s
+        if (!isFirstTime) {
+            timeDelay += 1450
+            isFirstTime = false
         }
+
+        println("READY KILL =>")
+        // Đếm ngược
+        object : CountDownTimer(timeDelay, 750) {
+            override fun onTick(millisUntilFinished: Long) {}
+            override fun onFinish() {
+                // Kết thúc cuộc gọi ngay lập tức
+                killCall(context)
+            }
+        }.start()
+//        if (AppStorage.IsHangUpAsSoonAsUserAnswer) {
+//            println("READY KILL =>")
+//            // Đếm ngược
+//            object : CountDownTimer(1500, 750) {
+//                override fun onTick(millisUntilFinished: Long) {}
+//                override fun onFinish() {
+//                    // Kết thúc cuộc gọi ngay lập tức
+//                    killCall(context)
+//                }
+//            }.start()
+//        } else {
+//
+//        }
     }
 
     private fun killCall(context: Context): Boolean {

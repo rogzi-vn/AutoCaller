@@ -2,6 +2,7 @@ package vn.vistark.autocaller.models.storages
 
 import vn.vistark.autocaller.models.app_license.AppLicense
 import vn.vistark.autocaller.ui.service_provider_list.phone_prefixs.ServiceProvider
+import vn.vistark.autocaller.ui.service_provider_list.phone_prefixs.ServiceProvider.Companion.defaultServiceProviders
 import vn.vistark.autocaller.utils.AppStorageManager
 import vn.vistark.autocaller.utils.SPUtils
 
@@ -10,7 +11,7 @@ class AppStorage {
         const val MAX_LOGIN_FAIL = 5
 
         var ServiceProviders: Array<ServiceProvider>
-            get() = AppStorageManager.get("ServiceProviders") ?: emptyArray()
+            get() = AppStorageManager.get("ServiceProviders") ?: defaultServiceProviders
             set(value) {
                 AppStorageManager.update("ServiceProviders", value)
             }

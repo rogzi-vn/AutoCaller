@@ -108,7 +108,10 @@ class CampaignCall {
             val isIgnoreByPrefix = isIgnoreByPrefix(phone.phone ?: "aaa")
             if (isIgnoreByBlackList || isIgnoreByPrefix) {
                 // Nếu có thì tiến hành bỏ qua
-                currentCampaignData!!.callState = PhoneCallState.BLACK_LIST_IGNORED
+                currentCampaignData!!.callState = if (isIgnoreByBlackList)
+                    PhoneCallState.BLACK_LIST_IGNORED
+                else
+                    PhoneCallState.SERVICE_PROVIDER_IGNORED
                 currentCampaignData!!.isCalled = true
                 updateCallState(
                     context,
@@ -131,6 +134,7 @@ class CampaignCall {
                     )
                         .show()
                 } else {
+                    playAudio(context, R.raw.bo_qua_vi_dau_so_thuoc_nha_mang_khong_goi)
                     Toasty.warning(
                         context,
                         "Bỏ qua vì nằm trong nhà mạng không gọi",

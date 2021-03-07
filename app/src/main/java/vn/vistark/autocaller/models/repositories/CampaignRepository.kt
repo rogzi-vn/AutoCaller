@@ -169,18 +169,9 @@ class CampaignRepository(val context: Context) {
 
     fun get(id: Int): CampaignModel? {
 
+        val selectQuery = "SELECT  * FROM ${CampaignModel.TABLE_NAME} WHERE ${CampaignModel.ID} = ?"
         // Lấy con trỏ
-        val cursor = instance.readableDatabase.query(
-            true,
-            CampaignModel.TABLE_NAME,
-            null,
-            null,
-            null,
-            null,
-            null,
-            "${CampaignModel.ID} DESC",
-            null
-        )
+        val cursor = instance.readableDatabase.rawQuery(selectQuery, arrayOf(id.toString()))
 
         // Nếu không có bản ghi
         if (!cursor.moveToFirst()) {
