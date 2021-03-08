@@ -2,6 +2,8 @@ package vn.vistark.autocaller.controller.campaign_detail
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.CampaignDataModel
@@ -12,12 +14,10 @@ import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.services.BackgroundService
-import vn.vistark.autocaller.services.BackgroundService.Companion.StartBackgroundService
 import vn.vistark.autocaller.services.BackgroundService.Companion.isStartCampaign
-import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
 import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
+import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class CampaignCall {
@@ -29,6 +29,13 @@ class CampaignCall {
         fun playAudio(context: Context, audioId: Int) {
             val mPlayer: MediaPlayer = MediaPlayer.create(context, audioId)
             mPlayer.start()
+        }
+
+        fun Context.runHandler(f: (() -> Unit)) {
+            val handler = Handler(Looper.getMainLooper())
+            handler.post {
+                f.invoke()
+            }
         }
 
         fun start(context: Context, campaignId: Int) {
@@ -71,11 +78,13 @@ class CampaignCall {
             // Còn không, hiển thị thông tin số
             try {
                 act?.updateCallingInfo(phone)
-                Toasty.info(
-                    context,
-                    "ĐANG GỌI SỐ ${phone.phone}",
-                    Toasty.LENGTH_SHORT
-                ).show()
+                context.runHandler {
+                    Toasty.info(
+                        context,
+                        "ĐANG GỌI SỐ ${phone.phone}",
+                        Toasty.LENGTH_SHORT
+                    ).show()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -127,20 +136,24 @@ class CampaignCall {
 
                 if (isIgnoreByBlackList) {
                     playAudio(context, R.raw.bo_qua_vi_nam_trong_danh_sach_den)
-                    Toasty.warning(
-                        context,
-                        "Bỏ qua vì nằm trong danh sách đen",
-                        Toasty.LENGTH_SHORT
-                    )
-                        .show()
+                    context.runHandler {
+                        Toasty.warning(
+                            context,
+                            "Bỏ qua vì nằm trong danh sách đen",
+                            Toasty.LENGTH_SHORT
+                        )
+                            .show()
+                    }
                 } else {
-                    playAudio(context, R.raw.bo_qua_vi_dau_so_thuoc_nha_mang_khong_goi)
-                    Toasty.warning(
-                        context,
-                        "Bỏ qua vì nằm trong nhà mạng không gọi",
-                        Toasty.LENGTH_SHORT
-                    )
-                        .show()
+//                    playAudio(context, R.raw.bo_qua_vi_dau_so_thuoc_nha_mang_khong_goi)
+                    context.runHandler {
+                        Toasty.warning(
+                            context,
+                            "Bỏ qua vì nằm trong nhà mạng không gọi",
+                            Toasty.LENGTH_SHORT
+                        )
+                            .show()
+                    }
                 }
 
                 //  Bắt đầu cuộc gọi tiếp theo sau DelayTimeInSeconds
@@ -186,5 +199,7 @@ class CampaignCall {
             }
             return false
         }
+
+
     }
 }

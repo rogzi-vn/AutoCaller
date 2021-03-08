@@ -57,9 +57,8 @@ class CampaignActivity : AppCompatActivity() {
         adapter.onClick = { campaign ->
             val intent = Intent(this, CampaignDetailActivity::class.java)
             intent.putExtra(CampaignModel.ID, campaign.id)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             startActivity(intent)
-            /// Đóng activity hiện tại cho nhẹ
-            finish()
         }
     }
 
