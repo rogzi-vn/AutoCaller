@@ -10,7 +10,14 @@ import vn.vistark.autocaller.ui.service_provider_list.phone_prefixs.PhonePrefixA
 import vn.vistark.autocaller.ui.service_provider_list.phone_prefixs.ServiceProvider
 
 class ServiceProviderAdapter : RecyclerView.Adapter<ServiceProviderViewHolder>() {
-    val sps = AppStorage.ServiceProviders
+    var sps = AppStorage.ServiceProviders
+
+    init {
+        if (AppStorage.ServiceProviders.isNullOrEmpty()) {
+            AppStorage.ServiceProviders = ServiceProvider.defaultServiceProviders
+        }
+        sps = AppStorage.ServiceProviders
+    }
 
     var onLongClick: ((ServiceProvider) -> Unit)? = null
     var onClick: ((ServiceProvider) -> Unit)? = null

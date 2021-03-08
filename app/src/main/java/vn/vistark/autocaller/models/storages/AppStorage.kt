@@ -11,7 +11,7 @@ class AppStorage {
         const val MAX_LOGIN_FAIL = 5
 
         var ServiceProviders: Array<ServiceProvider>
-            get() = AppStorageManager.get("ServiceProviders") ?: defaultServiceProviders
+            get() = AppStorageManager.get("ServiceProviders") ?: emptyArray()
             set(value) {
                 AppStorageManager.update("ServiceProviders", value)
             }
