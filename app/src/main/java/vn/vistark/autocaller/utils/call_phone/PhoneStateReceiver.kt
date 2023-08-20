@@ -8,12 +8,15 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.models.storages.AppStorage
-import vn.vistark.autocaller.services.BackgroundService.Companion.isStopTemporarily
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.isStopTemporarily
 import java.lang.reflect.Method
 
 
 // https://stackoverflow.com/questions/9684866/how-to-detect-when-phone-is-answered-or-rejected
 class PhoneStateReceiver : BroadcastReceiver() {
+
+    private val TAG = PhoneStateReceiver::javaClass.name
+
     companion object {
         const val NAME = "PhoneStateReceiver"
         const val INCOMMING_CALL = "INCOMMING_CALL"
@@ -28,6 +31,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
     // Khi nhận được trạng thái về cuộc gọi
     override fun onReceive(context: Context, intent: Intent) {
+        PhoneCallUtils.removeTimer()
         if (intent.action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
             when (intent.getStringExtra(TelephonyManager.EXTRA_STATE)) {
                 TelephonyManager.EXTRA_STATE_IDLE -> {
@@ -40,6 +44,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
                     // Nếu trạng thái trước đó là trạng thái dừng tạm thời do có cuộc gọi đến
                     if (previousState == "EXTRA_STATE_RINGING" || isStopTemporarily) {
+                        Log.w(TAG, "onReceive: Đã xong phần tạm dừng của cuộc gọi đến, tiến hành TIẾP TỤC chiến dịch")
                         // Gửi thông báo để tái khởi động lại chiến dịch
                         context.sendBroadcast(Intent(STOP_TEMPORARILY_DONE))
                     }
@@ -61,7 +66,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
                 TelephonyManager.EXTRA_STATE_OFFHOOK -> {
 
                     // Nếu trước đó đang là trạng thái nghỉ
-                    if (previousState == "EXTRA_STATE_IDLE")
+                    if (previousState == "EXTRA_STATE_IDLE" || previousState == "EXTRA_STATE_RINGING")
                         KillCallTimer(context)
 
                     // Làm mới trạng thái hiện tại
@@ -131,6 +136,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
             // Invoke getITelephony() to get the ITelephony interface
             val telephonyInterface: Any? = methodGetITelephony.invoke(telephonyManager)
 
+
             // Get the endCall method from ITelephony
             val telephonyInterfaceClass =
                 Class.forName(telephonyInterface?.javaClass?.name ?: "ERROR?")
@@ -139,6 +145,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
             // Invoke endCall()
             methodEndCall.invoke(telephonyInterface)
         } catch (ex: Exception) { // Many things can go wrong with reflection calls
+            ex.printStackTrace()
             Toasty.error(
                 context,
                 "Ứng dụng không thể can thiệp vào hệ thống để ngưng cuộc gọi",

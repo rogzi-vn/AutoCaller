@@ -3,10 +3,8 @@ package vn.vistark.autocaller.ui.campaign_detail
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,11 +25,12 @@ import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.services.BackgroundService
-import vn.vistark.autocaller.services.BackgroundService.Companion.IsBackgroundServiceRunning
-import vn.vistark.autocaller.services.BackgroundService.Companion.StartBackgroundService
-import vn.vistark.autocaller.services.BackgroundService.Companion.StopBackgroundService
-import vn.vistark.autocaller.services.BackgroundService.Companion.isStartCampaign
-import vn.vistark.autocaller.services.BackgroundService.Companion.isStopTemporarily
+import vn.vistark.autocaller.services.BackgroundServiceCompanion
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.IsBackgroundServiceRunning
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.StartBackgroundService
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.StopBackgroundService
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.isStartCampaign
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.isStopTemporarily
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import vn.vistark.autocaller.ui.campaign.CampaignActivity
 import vn.vistark.autocaller.ui.campaign_update.CampaignUpdateActivity
@@ -166,7 +165,7 @@ class CampaignDetailActivity : AppCompatActivity() {
 
     private fun stopRegisReciver() {
         try {
-            unregisterReceiver(BackgroundService.broadcastReceiver)
+            unregisterReceiver(BackgroundServiceCompanion.broadcastReceiver)
         } catch (e: Exception) {
         }
     }

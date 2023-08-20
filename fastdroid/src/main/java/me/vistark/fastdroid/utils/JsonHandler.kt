@@ -1,16 +1,18 @@
 package me.vistark.fastdroid.utils
 
 import com.google.gson.Gson
-import java.util.*
+import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 
 object JsonHandler {
     // Chuyển đối tượng thành chuỗi Json
-    fun Any.toJson(): String {
+    inline fun <reified T> T.toJson(): String {
         return Gson().toJson(this)
     }
 
     // Từ chuỗi Json chuyển thành đối tượng có kiểu
-    fun <T> String.toTyped(objectType: T): T {
-        return Gson().fromJson(this, objectType!!::class.java)
+    inline fun <reified T> String.toTyped(): T {
+        val type = object : TypeToken<T>() {}.type
+        return Gson().fromJson(this, type)
     }
 }

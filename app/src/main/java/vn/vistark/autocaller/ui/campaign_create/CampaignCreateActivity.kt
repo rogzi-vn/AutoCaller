@@ -11,15 +11,18 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_campaign_create.*
+import vn.vistark.autocaller.BuildConfig
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign_create.CampaignCreateController
 import vn.vistark.autocaller.controller.campaign_create.CampaignCreateLoader
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignRepository
+import java.io.File
 
 
 // Animation: https://stackoverflow.com/questions/6796139/fade-in-fade-out-android-animation-in-java
@@ -72,7 +75,7 @@ class CampaignCreateActivity : AppCompatActivity() {
         currentCampaignId = CampaignRepository(this).getMaxId() + 1L
 
         // Tự động lấy ID tiếp theo cho chiến dịch
-        campaignTvCreateName.setText("Tên chiến dịch (#$currentCampaignId)")
+        campaignTvCreateName.text = "Tên chiến dịch (#$currentCampaignId)"
 
         // Tự động tạo tên cho tên chiến dịch
         campaignEdtCreateName.setText(CampaignCreateController.generateCampaignName())
@@ -111,6 +114,36 @@ class CampaignCreateActivity : AppCompatActivity() {
     }
 
     private fun initConfirmEvents() {
+        if (BuildConfig.DEBUG) {
+            btnCreate10K.visibility = View.VISIBLE
+            btnCreate10K.setOnClickListener {
+                val outputFile = File.createTempFile("test_phone_number_10K", ".txt", cacheDir)
+
+                if (outputFile.exists()) {
+                    outputFile.delete() // Xoá file nếu tồn tại
+                }
+
+                for (i in 1..1000) {
+                    val phone = "032997" + String.format("%04d",i) + "\n"
+                    outputFile.appendText(phone)
+                }
+
+                // Trả về uri của file
+                dataUri = FileProvider.getUriForFile(
+                    applicationContext,
+                    "${packageName}.provider",
+                    outputFile
+                )
+
+                fadeOutPicker()
+
+                // Cập nhật đường dẫn vào TextBox
+                campaignCreateEdtDataPath.setText(dataUri?.path ?: "Đã chọn thành công")
+                // Mở khóa nút confirm
+                loginBtnConfirmButton.isEnabled = true
+            }
+        }
+
         loginBtnConfirmButton.setOnClickListener {
             if (dataUri != null)
             // Thực hiện animation thu nhỏ phần chọn file
@@ -249,10 +282,6 @@ class CampaignCreateActivity : AppCompatActivity() {
             // Trở lên
             return
         }
-
-        // Nếu là yêu cầu pick file của app nhưng lại không thành công
-        if (requestCode == PICK_DATA_FILE && resultCode != Activity.RESULT_OK)
-            return
     }
 
     @SuppressLint("SetTextI18n")

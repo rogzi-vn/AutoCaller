@@ -96,6 +96,17 @@
                 android:enabled="false"
                 android:text="Tải dữ liệu &amp; tạo chiến dịch"
                 android:textAllCaps="true" />
+
+            <Button
+                android:id="@+id/btnCreate10K"
+                style="@style/Button.Default"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:enabled="true"
+                android:visibility="gone"
+                android:text="Tạo thử 10K"
+                android:textAllCaps="true" />
         </LinearLayout>
         <!-- End giao diện phần chọn file dữ liệu -->
     </ScrollView>

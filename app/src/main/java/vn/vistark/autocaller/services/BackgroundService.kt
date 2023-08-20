@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_campaign_detail.*
 import vn.vistark.autocaller.R
@@ -15,6 +16,11 @@ import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.models.storages.AppStorage
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.ClearDelayCallTimer
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.StartBackgroundService
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.broadcastReceiver
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.regisBroadcastReceiver
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.unregisBroadcastReceiver
 import vn.vistark.autocaller.utils.SPUtils
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import java.lang.Exception
@@ -23,116 +29,7 @@ import java.util.*
 
 class BackgroundService : Service() {
 
-    companion object {
-        // Cờ lưu giá trị có dừng tạm khi khi xuất hiện cuộc gọi đến
-        var isStopTemporarily = false
-
-        // Cờ cho phép bắt đầu gọi liên tục
-        var isStartCampaign = false
-
-        var currentCampaign: CampaignModel? = null
-        var broadcastReceiver: BroadcastReceiver? = null
-
-        fun Context.IsBackgroundServiceRunning(): Boolean {
-            val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-            for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-                if (BackgroundService::class.java.name == service.service.className) {
-                    return true
-                }
-            }
-            return false
-        }
-
-        fun Context.StopBackgroundService() {
-
-            try {
-                // Bỏ đăng ký broadcast trước đó
-                if (broadcastReceiver != null) {
-                    unregisterReceiver(broadcastReceiver)
-                    broadcastReceiver = null
-                }
-            } catch (e: Exception) {
-            }
-
-            isStartCampaign = false
-
-            val intent = Intent(this, BackgroundService::class.java)
-            stopService(intent)
-        }
-
-        fun Context.StartBackgroundService(campaign: CampaignModel) {
-            // Nếu đã chạy rồi thì bỏ qua
-            if (IsBackgroundServiceRunning())
-                return
-
-            try {
-                // Bỏ đăng ký broadcast trước đó
-                if (broadcastReceiver != null) {
-                    unregisterReceiver(broadcastReceiver)
-                    broadcastReceiver = null
-                }
-            } catch (e: Exception) {
-            }
-
-            currentCampaign = campaign
-
-            isStartCampaign = true
-            isStopTemporarily = false
-
-            val intent = Intent(this, BackgroundService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
-
-            // Broad cast khi thực hiện nhá máy
-            broadcastReceiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context?, intent: Intent?) {
-                    // Cập nhật vào CSDL
-                    if (CampaignCall.currentCampaignData != null) {
-                        CampaignCall.currentCampaignData!!.callState = PhoneCallState.CALLED
-                        CampaignCall.currentCampaignData!!.isCalled = true
-                        CampaignCall.updateCallState(
-                            this@StartBackgroundService,
-                            currentCampaign!!,
-                            CampaignCall.currentCampaignData!!
-                        )
-                    }
-
-                    // Cập nhật progress
-                    try {
-                        CampaignCall.act?.initCampaignData()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-
-                    // Renew trạng thái
-                    PhoneStateReceiver.previousState = "EXTRA_STATE_IDLE"
-
-                    //  Bắt đầu cuộc gọi tiếp theo sau DelayTimeInSeconds
-                    Timer().schedule(object : TimerTask() {
-                        override fun run() {
-                            this.cancel()
-                            if (isStartCampaign || isStopTemporarily)
-                                CampaignCall.start(
-                                    this@StartBackgroundService,
-                                    currentCampaign!!.id
-                                )
-                        }
-                    }, AppStorage.DelayTimeInSeconds * 1000L)
-                }
-            }
-
-            // Đăng ký nghe khi xong cuộc gọi
-            registerReceiver(broadcastReceiver, IntentFilter(PhoneStateReceiver.NAME))
-
-            // Bắt đầu cuộc gọi
-            CampaignCall.start(this, campaign.id)
-        }
-    }
-
-    private val PERIOD = 5000.toLong()
+    private val TAG: String = BackgroundService::javaClass.name
 
     // Phần khai báo liên quan đến thông báo (Notification)
     private val mNotificationChannelId = "Settings"
@@ -217,16 +114,19 @@ class BackgroundService : Service() {
     private var broadcastReceiverWhenPhoneComming: BroadcastReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
+                Log.w(TAG, "onReceive: Có cuộc gọi đến")
                 // Ngưng chiến dịch khi có cuộc gọi đến
-                try {
-                    CampaignCall.act?.pause()
-                    // Bỏ đăng ký nghe khi xong cuộc gọi
-                    stopRegisReciver()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+//                try {
+//                    CampaignCall.act?.pause()
+//                    // Bỏ đăng ký nghe khi xong cuộc gọi
+//                    stopRegisReciver()
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                }
+                unregisBroadcastReceiver()
+                ClearDelayCallTimer()
                 // Cho biết đây chỉ là hành động ngưng tạm thời
-                isStopTemporarily = true
+                BackgroundServiceCompanion.isStopTemporarily = true
             }
         }
 
@@ -238,26 +138,32 @@ class BackgroundService : Service() {
                 override fun run() {
                     // Kết thúc timer này
                     this.cancel()
-                    try {
-                        // Bấm nút tái khởi động nếu chưa được bấm
-                        if (CampaignCall.act?.acdBtnStart?.isEnabled == true)
-                            CampaignCall.act?.acdBtnStart?.performClick()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+//                    try {
+//                        // Bấm nút tái khởi động nếu chưa được bấm
+//                        if (CampaignCall.act?.acdBtnStart?.isEnabled == true)
+//                            CampaignCall.act?.acdBtnStart?.performClick()
+//                    } catch (e: Exception) {
+//                        e.printStackTrace()
+//                    }
+                    regisBroadcastReceiver()
                     // Cho biết không còn ngưng tạm thời nữa
-                    isStopTemporarily = false
+                    BackgroundServiceCompanion.isStopTemporarily = false
+
+                    // Bắt đầu cuộc gọi
+                    if (BackgroundServiceCompanion.currentCampaign != null) {
+                        CampaignCall.start(
+                            this@BackgroundService.applicationContext,
+                            BackgroundServiceCompanion.currentCampaign!!.id
+                        )
+                    }
                 }
 
-            }, AppStorage.DelayTimeInSeconds * 1000L)
+            }, 1500L)
         }
     }
 
     private fun stopRegisReciver() {
-        try {
-            unregisterReceiver(broadcastReceiver)
-        } catch (e: Exception) {
-        }
+        unregisBroadcastReceiver()
 
         // Thực hiện các tác vụ tại đây
         try {

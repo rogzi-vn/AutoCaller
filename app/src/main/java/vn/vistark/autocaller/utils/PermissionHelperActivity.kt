@@ -41,7 +41,7 @@ class PermissionHelperActivity : AppCompatActivity() {
         }
 
         // Load dữ liệu lấy được vào webview để người dùng đọc
-        permissionWvContent.loadData(permissionPage, "text/html", "utf-8")
+        permissionWvContent.loadData(permissionPage, "text/html; charset=utf-8", "utf-8")
 
     }
 

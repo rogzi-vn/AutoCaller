@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_login.*
+import vn.vistark.autocaller.BuildConfig
 import vn.vistark.autocaller.MainActivity
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.storages.AppStorage
@@ -14,6 +15,12 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        // TODO: Remove after done debug
+        if (BuildConfig.DEBUG) {
+            gotoCampaign()
+            return
+        }
 
         // Nếu người dùng đã có mật khẩu và mật khẩu ấy đúng
         if (AppStorage.UserPassword.isNotEmpty() && AppStorage.UserPassword == AppStorage.AppPassword) {

@@ -26,12 +26,10 @@ import kotlinx.android.synthetic.main.activity_campaign_create.*
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.blacklink_add.general_file.BlackListAddLoader
 import vn.vistark.autocaller.controller.blacklink_add.google_link.BlackListAddViaGGLinkLoader
-import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
-import vn.vistark.autocaller.controller.campaign_detail.CampaignResetLoader
 import vn.vistark.autocaller.models.BlackListModel
 import vn.vistark.autocaller.models.repositories.BlackListRepository
 import vn.vistark.autocaller.models.storages.AppStorage
-import vn.vistark.autocaller.services.BackgroundService.Companion.IsBackgroundServiceRunning
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.IsBackgroundServiceRunning
 import vn.vistark.autocaller.ui.campaign_create.CampaignCreateActivity
 
 class BlacklistActivity : AppCompatActivity() {

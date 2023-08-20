@@ -4,6 +4,8 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import android.telephony.TelephonyManager
+import androidx.core.content.ContextCompat.getSystemService
 import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.CampaignDataModel
@@ -13,8 +15,7 @@ import vn.vistark.autocaller.models.repositories.BlackListRepository
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.models.storages.AppStorage
-import vn.vistark.autocaller.services.BackgroundService
-import vn.vistark.autocaller.services.BackgroundService.Companion.isStartCampaign
+import vn.vistark.autocaller.services.BackgroundServiceCompanion
 import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
 import java.util.*
@@ -78,13 +79,6 @@ class CampaignCall {
             // Còn không, hiển thị thông tin số
             try {
                 act?.updateCallingInfo(phone)
-                context.runHandler {
-                    Toasty.info(
-                        context,
-                        "ĐANG GỌI SỐ ${phone.phone}",
-                        Toasty.LENGTH_SHORT
-                    ).show()
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -101,10 +95,17 @@ class CampaignCall {
                 }
 
                 // Cập nhật trạng thái thực hiện cuộc gọi, tăng số index lên
-                updateCallState(context, currentCampaign, phone)
-                // Gọi số tiếp theo nếu được
-                if (isStartCampaign)
-                    start(context, campaignId)
+                if (act != null) {
+                    updateCallState(act!!, currentCampaign, phone)
+                    // Gọi số tiếp theo nếu được
+                    if (BackgroundServiceCompanion.isStartCampaign)
+                        start(act!!, campaignId)
+                } else {
+                    updateCallState(context, currentCampaign, phone)
+                    // Gọi số tiếp theo nếu được
+                    if (BackgroundServiceCompanion.isStartCampaign)
+                        start(context.applicationContext, campaignId)
+                }
                 return
             }
 
@@ -124,7 +125,7 @@ class CampaignCall {
                 currentCampaignData!!.isCalled = true
                 updateCallState(
                     context,
-                    BackgroundService.currentCampaign!!,
+                    BackgroundServiceCompanion.currentCampaign!!,
                     currentCampaignData!!
                 )
                 // Cập nhật progress
@@ -160,20 +161,18 @@ class CampaignCall {
                 Timer().schedule(object : TimerTask() {
                     override fun run() {
                         this.cancel()
-                        if (isStartCampaign || BackgroundService.isStopTemporarily)
+                        if (BackgroundServiceCompanion.isStartCampaign || BackgroundServiceCompanion.isStopTemporarily)
                             start(
-                                context,
-                                BackgroundService.currentCampaign!!.id
+                                act ?: context.applicationContext,
+                                BackgroundServiceCompanion.currentCampaign!!.id
                             )
                     }
                 }, 1500L)
 
                 return
             } else {
-                // Nếu không có, gọi
-                println(">>>>>> GỌI")
                 // Gọi
-                PhoneCallUtils.startCall(context, phone.phone!!)
+                PhoneCallUtils.startCall(act ?: context, phone.phone!!)
             }
         }
 
@@ -199,6 +198,8 @@ class CampaignCall {
             }
             return false
         }
+
+
 
 
     }
