@@ -5,9 +5,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.telecom.TelecomManager
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.pedant.SweetAlert.SweetAlertDialog
@@ -17,10 +19,16 @@ import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign.CampaignLoader
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignRepository
+import vn.vistark.autocaller.models.storages.AppStorage
+import vn.vistark.autocaller.services.BackgroundServiceCompanion
+import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.StartBackgroundService
 import vn.vistark.autocaller.ui.campaign_create.CampaignCreateActivity
 import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 import vn.vistark.autocaller.ui.setting.SettingActivity
 import vn.vistark.autocaller.ui.sync_campaign_online.SyncCampaignOnline
+import vn.vistark.autocaller.utils.SPUtils
+import java.util.*
+import kotlin.collections.ArrayList
 
 class CampaignActivity : AppCompatActivity() {
     // Nơi chứa dữ liệu danh sách các chiến dịch
@@ -29,9 +37,13 @@ class CampaignActivity : AppCompatActivity() {
     // Adapter để hiển thị và điều khiển dữ liệu
     lateinit var adapter: CampaignAdapter
 
+    var autoStartTimer: Timer? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_campaign)
+
+        SPUtils.init(this)
 
         // Ẩn thanh loading tải danh sách chiến dịch
         hideLoading()
@@ -53,6 +65,40 @@ class CampaignActivity : AppCompatActivity() {
         // Tiến hành load dữ liệu
         CampaignLoader(this)
 
+        if (AppStorage.TimerAutoRunCampaignInSeconds > 0) {
+            Toast.makeText(
+                this,
+                "Chiến dịch sẽ tự động chạy sau ${AppStorage.TimerAutoRunCampaignInSeconds} giây nữa...",
+                Toast.LENGTH_SHORT
+            ).show()
+            var countDown = AppStorage.TimerAutoRunCampaignInSeconds
+            autoStartTimer = Timer()
+            autoStartTimer!!.schedule(object : TimerTask() {
+                override fun run() {
+                    if (AppStorage.TimerAutoRunCampaignInSeconds == 0) {
+                        return
+                    }
+                    Log.d("Campaign", "run: Campaign will be start in $countDown seconds")
+                    if (--countDown <= 0) {
+                        // Tìm ra chiến dịch chưa hoàn tất
+                        val unfinished =
+                            adapter.campaigns
+                                .firstOrNull { x -> x.totalCalled < x.totalImported }
+
+                        if (unfinished != null) {
+                            cancel()
+                            autoStartTimer?.cancel()
+                            autoStartTimer = null
+                            startCampaignDetailActivity(unfinished, true)
+                        }
+                    }
+                }
+            }, 500, 1000L)
+        }
+
+        // Khởi tạo dịch vụ chạy ngầm
+//        this.StartBackgroundService()
+
 //        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 //            if (getSystemService(TelecomManager::class.java).defaultDialerPackage != packageName) {
 //                Toasty.success(this, "adfdaf").show()
@@ -65,11 +111,19 @@ class CampaignActivity : AppCompatActivity() {
 
     private fun showDetailEvent() {
         adapter.onClick = { campaign ->
-            val intent = Intent(this, CampaignDetailActivity::class.java)
-            intent.putExtra(CampaignModel.ID, campaign.id)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            startActivity(intent)
+            startCampaignDetailActivity(campaign)
         }
+    }
+
+    private fun startCampaignDetailActivity(
+        campaignModel: CampaignModel,
+        isStartNow: Boolean = false
+    ) {
+        val intent = Intent(this, CampaignDetailActivity::class.java)
+        intent.putExtra(CampaignModel.ID, campaignModel.id)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        intent.putExtra("IsStartNow", isStartNow)
+        startActivity(intent)
     }
 
     private fun removeCampaignEvent() {
@@ -103,12 +157,15 @@ class CampaignActivity : AppCompatActivity() {
             R.id.trMenuAddCampaign -> {
                 return createNewCampaign()
             }
+
             R.id.trMenuSetting -> {
                 return settingApp()
             }
+
             R.id.trSyncCampaignOnline -> {
                 return syncOnlineCampaign()
             }
+
             else -> {
                 Toasty.error(this, "Không tìm thấy tùy chọn này", Toasty.LENGTH_SHORT, true).show()
             }
@@ -201,6 +258,12 @@ class CampaignActivity : AppCompatActivity() {
             addCampaign(campaign)
 
         }
+    }
+
+    override fun onDestroy() {
+        autoStartTimer?.cancel()
+        autoStartTimer = null
+        super.onDestroy()
     }
 
 }

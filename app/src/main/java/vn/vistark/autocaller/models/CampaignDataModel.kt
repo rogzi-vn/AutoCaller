@@ -17,7 +17,10 @@ class CampaignDataModel(
     var indexInCampaign: Int = 0,
 
     // Số đã được gọi hay chưa
-    var isCalled: Boolean = false
+    var isCalled: Boolean = false,
+
+    // Thời gian để cuộc gọi đi bắt được tín hiệu tính theo mili giây
+    var receivedSignalTimeInMilliseconds: Long = 0L
 ) {
 
     companion object {
@@ -28,6 +31,7 @@ class CampaignDataModel(
         const val CALL_STATE = "call_state"
         const val INDEX_IN_CAMPAIGN = "index_in_campaign"
         const val IS_CALLED = "is_called"
+        const val RECEIVED_SIGNAL_TIME_IN_MILLISECONDS = "received_signal_time_in_milliseconds"
     }
 
 

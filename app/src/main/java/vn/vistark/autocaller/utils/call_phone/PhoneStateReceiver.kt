@@ -6,10 +6,8 @@ import android.content.Intent
 import android.os.CountDownTimer
 import android.telephony.TelephonyManager
 import android.util.Log
-import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.isStopTemporarily
-import java.lang.reflect.Method
 
 
 // https://stackoverflow.com/questions/9684866/how-to-detect-when-phone-is-answered-or-rejected
@@ -44,7 +42,10 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
                     // Nếu trạng thái trước đó là trạng thái dừng tạm thời do có cuộc gọi đến
                     if (previousState == "EXTRA_STATE_RINGING" || isStopTemporarily) {
-                        Log.w(TAG, "onReceive: Đã xong phần tạm dừng của cuộc gọi đến, tiến hành TIẾP TỤC chiến dịch")
+                        Log.w(
+                            TAG,
+                            "onReceive: Đã xong phần tạm dừng của cuộc gọi đến, tiến hành TIẾP TỤC chiến dịch"
+                        )
                         // Gửi thông báo để tái khởi động lại chiến dịch
                         context.sendBroadcast(Intent(STOP_TEMPORARILY_DONE))
                     }
@@ -54,6 +55,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
                     Log.w("PHONE_STATE", "IDLE")
                 }
+
                 TelephonyManager.EXTRA_STATE_RINGING -> {
 
                     // Làm mới trạng thái hiện tại
@@ -63,16 +65,22 @@ class PhoneStateReceiver : BroadcastReceiver() {
                     context.sendBroadcast(Intent(INCOMMING_CALL))
                     Log.w("PHONE_STATE", "RING")
                 }
+
                 TelephonyManager.EXTRA_STATE_OFFHOOK -> {
 
                     // Nếu trước đó đang là trạng thái nghỉ
-                    if (previousState == "EXTRA_STATE_IDLE" || previousState == "EXTRA_STATE_RINGING")
+                    if (previousState == "EXTRA_STATE_IDLE" || previousState == "EXTRA_STATE_RINGING") {
+                        if (previousState == "EXTRA_STATE_IDLE") {
+                            PhoneCallUtils.onHaveSignal()
+                        }
                         KillCallTimer(context)
+                    }
 
                     // Làm mới trạng thái hiện tại
                     previousState = "EXTRA_STATE_OFFHOOK"
                     Log.w("PHONE_STATE", "OFF_HOOK")
                 }
+
                 else -> {
                     Log.w("PHONE_STATE", "OTHER")
                 }
@@ -101,7 +109,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
             override fun onTick(millisUntilFinished: Long) {}
             override fun onFinish() {
                 // Kết thúc cuộc gọi ngay lập tức
-                killCall(context)
+                PhoneCallUtils.KillCall(context)
             }
         }.start()
 //        if (AppStorage.IsHangUpAsSoonAsUserAnswer) {
@@ -119,40 +127,5 @@ class PhoneStateReceiver : BroadcastReceiver() {
 //        }
     }
 
-    private fun killCall(context: Context): Boolean {
-        try {
-            // Get the boring old TelephonyManager
-            val telephonyManager =
-                context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
-            // Get the getITelephony() method
-            val classTelephony =
-                Class.forName(telephonyManager.javaClass.name)
-            val methodGetITelephony: Method = classTelephony.getDeclaredMethod("getITelephony")
-
-            // Ignore that the method is supposed to be private
-            methodGetITelephony.isAccessible = true
-
-            // Invoke getITelephony() to get the ITelephony interface
-            val telephonyInterface: Any? = methodGetITelephony.invoke(telephonyManager)
-
-
-            // Get the endCall method from ITelephony
-            val telephonyInterfaceClass =
-                Class.forName(telephonyInterface?.javaClass?.name ?: "ERROR?")
-            val methodEndCall: Method = telephonyInterfaceClass.getDeclaredMethod("endCall")
-
-            // Invoke endCall()
-            methodEndCall.invoke(telephonyInterface)
-        } catch (ex: Exception) { // Many things can go wrong with reflection calls
-            ex.printStackTrace()
-            Toasty.error(
-                context,
-                "Ứng dụng không thể can thiệp vào hệ thống để ngưng cuộc gọi",
-                Toasty.LENGTH_SHORT
-            ).show()
-            return false
-        }
-        return true
-    }
 }

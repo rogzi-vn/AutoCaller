@@ -108,5 +108,50 @@ class AppStorage {
                     putInt("DelayTimeCallInSeconds", value)
                 }?.apply()
             }
+
+        // settingEdtTimerAutoRunCampaign
+        var TimerAutoRunCampaignInSeconds: Int
+            get() {
+                return SPUtils.sp?.getInt("TimerAutoRunCampaignInSeconds", 10) ?: 10
+            }
+            set(value) {
+                SPUtils.sp?.edit()?.apply {
+                    putInt("TimerAutoRunCampaignInSeconds", value)
+                }?.apply()
+            }
+
+        // settingEdtThresholdOfNoSignalCall
+        var ThresholdOfNoSignalCallInMilliseconds: Long
+            get() {
+                return SPUtils.sp?.getLong("ThresholdOfNoSignalCallInMilliseconds", 3000L) ?: 3000L
+            }
+            set(value) {
+                SPUtils.sp?.edit()?.apply {
+                    putLong("ThresholdOfNoSignalCallInMilliseconds", value)
+                }?.apply()
+            }
+
+        // settingEdtCountOfNoSignalCallToExit
+        var ThresholdOfExitingAppIfNoSignalCalls: Int
+            get() {
+                return SPUtils.sp?.getInt("ThresholdOfExitingAppIfNoSignalCalls", 20) ?: 20
+            }
+            set(value) {
+                SPUtils.sp?.edit()?.apply {
+                    putInt("ThresholdOfExitingAppIfNoSignalCalls", value)
+                }?.apply()
+            }
+
+        // scAutoReOpenAppIfShutdownSuddenly
+        var IsAutoReopenAppIfShutdownSuddenly: Boolean
+            get() {
+                return SPUtils.sp?.getBoolean("IsAutoReopenAppIfShutdownSuddenly", true)
+                    ?: true
+            }
+            set(count) {
+                SPUtils.sp?.edit()?.apply {
+                    putBoolean("IsAutoReopenAppIfShutdownSuddenly", count)
+                }?.apply()
+            }
     }
 }

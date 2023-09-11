@@ -101,6 +101,60 @@ class CampaignDataRepository(val context: Context) {
         return campaignDatas
     }
 
+    fun getAll(campaginId: Int): ArrayList<CampaignDataModel> {
+        // Khai báo biến chứa danh sách
+        val campaignDatas = ArrayList<CampaignDataModel>()
+        // Lấy con trỏ
+        val cursor = instance.readableDatabase.query(
+            true,
+            CampaignDataModel.TABLE_NAME,
+            null,
+            "${CampaignDataModel.CAMPAIGN_ID} = ?",
+            arrayOf(campaginId.toString()),
+            null,
+            null,
+            "${CampaignDataModel.CALL_STATE} DESC, ${CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS} ASC, ${CampaignDataModel.ID} ASC",
+            null
+        )
+        // Nếu không có bản ghi
+        if (!cursor.moveToFirst()) {
+            instance.readableDatabase.close()
+            cursor.close()
+            return campaignDatas
+        }
+
+        // Còn có thì tiến hành duyệt
+        do {
+            try {
+                // Gán dữ liệu vào đối tượng
+                val campaignData = CampaignDataModel(
+                    cursor.getInt(CampaignDataModel.ID),
+                    cursor.getInt(CampaignDataModel.CAMPAIGN_ID),
+                    cursor.getString(CampaignDataModel.PHONE),
+                    cursor.getInt(CampaignDataModel.CALL_STATE),
+                    cursor.getInt(CampaignDataModel.INDEX_IN_CAMPAIGN),
+                    cursor.getBoolean(CampaignDataModel.IS_CALLED)
+                )
+                // Theeo vào danh sách lưu trữ
+                campaignDatas.add(campaignData)
+            } catch (e: Exception) {
+                // Sự đời khó lường trước
+                e.printStackTrace()
+            }
+
+        } while (cursor.moveToNext())
+
+        // Đóng con trỏ
+        cursor.close()
+
+        // Đóng trình đọc
+        instance.readableDatabase.close()
+
+        // Trả về dữ liệu
+        return campaignDatas
+    }
+
+
     // Nên coi http://sqlfiddle.com/#!5/d0a2d/2746
     fun getLimit(campaginId: Int, lastCampaignDataId: Int, limit: Long): Array<CampaignDataModel> {
         // Khai báo biến chứa danh sách
@@ -114,7 +168,7 @@ class CampaignDataRepository(val context: Context) {
             arrayOf(lastCampaignDataId.toString(), campaginId.toString()),
             null,
             null,
-            "${CampaignDataModel.ID} ASC",
+            "${CampaignDataModel.CALL_STATE} DESC, ${CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS} ASC, ${CampaignDataModel.ID} ASC",
             limit.toString()
         )
         // Nếu không có bản ghi

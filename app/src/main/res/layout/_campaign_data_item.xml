@@ -14,8 +14,8 @@
         android:id="@+id/cDataPhoneNumber"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/cDataCallState"
-        android:layout_toLeftOf="@id/cDataCallState"
+        android:layout_toStartOf="@id/randomId2645765"
+        android:layout_toLeftOf="@id/randomId2645765"
         android:paddingHorizontal="10dp"
         android:paddingVertical="5dp"
         android:text="0886483147"
@@ -23,15 +23,30 @@
         android:textSize="16sp"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/cDataCallState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:id="@+id/randomId2645765"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="5dp"
-        android:text="Chưa gọi"
-        android:textColor="@color/colorSecondary"
-        android:textStyle="bold" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/cDataCallState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="0dp"
+            android:paddingVertical="5dp"
+            android:text="Chưa gọi"
+            android:textColor="@color/colorSecondary"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/cDataCallSignalTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="5dp"
+            android:text="(3.6s)"
+            android:textColor="@color/colorPrimaryDark"
+            android:textStyle="bold" />
+    </LinearLayout>
 </RelativeLayout>

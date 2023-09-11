@@ -6,8 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.CountDownTimer
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.telephony.PhoneNumberUtils
 import android.telephony.TelephonyManager
@@ -15,6 +13,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat.getSystemService
 import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.controller.campaign_detail.CampaignCall.Companion.runHandler
+import java.lang.reflect.Method
 import java.util.*
 
 
@@ -22,9 +21,31 @@ class PhoneCallUtils {
     companion object {
         private val TAG = PhoneCallUtils::class.java.simpleName
 
-        public var timerEnsureSimReadyToCallAgainIfFail: Timer? = null;
+        private var timerEnsureSimReadyToCallAgainIfFail: Timer? = null
+
+        // Thời điểm mà cuộc gọi được thực hiện
+        private var phoneCallStartAt: Long = 0L
+
+        // Thời điểm mà cuộc gọi có tín hiệu
+        private var phoneCallHaveSignalAt: Long = 0L
+
+        // Thời điểm mà tiến hành chấm dứt cuộc gọi
+        private var phoneCallEndAt: Long = 0L
+
+        private fun resetAll() {
+            phoneCallStartAt = 0L
+            phoneCallHaveSignalAt = 0L
+            phoneCallEndAt = 0L
+        }
+
+        fun getTimeHaveSignalInMilliseconds() = phoneCallHaveSignalAt - phoneCallStartAt
+
+        fun onHaveSignal() {
+            phoneCallHaveSignalAt = System.currentTimeMillis()
+        }
 
         fun startCall(context: Context, phoneNumber: String) {
+            resetAll()
             var number = phoneNumber
             // Chuẩn hóa số điện thoại
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -82,7 +103,10 @@ class PhoneCallUtils {
                 }
             }
 
+            phoneCallStartAt = System.currentTimeMillis()
 
+
+            // (***)
             context.runHandler {
                 timerEnsureSimReadyToCallAgainIfFail = Timer()
                 timerEnsureSimReadyToCallAgainIfFail!!.schedule(object : TimerTask() {
@@ -95,8 +119,10 @@ class PhoneCallUtils {
             }
         }
 
+        // Trong vòng 10s nếu nhận được tín hiệu broad cast cuộc gọi thì tiến hành huỷ/
+        // Nếu không phần (***) sẽ đợi hết 10s để tiến hành tự động thực hiện lại cuộc gọi
+        // và lặp lại phần timer cho đến khi được broadcast đóng
         fun removeTimer() {
-            Log.w(TAG, "removeTimer: Đã nhận được tín hiệu cuộc gọi => Bỏ ngay timer đảm bảo")
             if (timerEnsureSimReadyToCallAgainIfFail != null) {
                 timerEnsureSimReadyToCallAgainIfFail!!.cancel()
                 timerEnsureSimReadyToCallAgainIfFail = null
@@ -187,6 +213,44 @@ class PhoneCallUtils {
                 }
             }
             return false
+        }
+
+        fun KillCall(context: Context): Boolean {
+            phoneCallEndAt = System.currentTimeMillis()
+            try {
+                // Get the boring old TelephonyManager
+                val telephonyManager =
+                    context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+
+                // Get the getITelephony() method
+                val classTelephony =
+                    Class.forName(telephonyManager.javaClass.name)
+                val methodGetITelephony: Method = classTelephony.getDeclaredMethod("getITelephony")
+
+                // Ignore that the method is supposed to be private
+                methodGetITelephony.isAccessible = true
+
+                // Invoke getITelephony() to get the ITelephony interface
+                val telephonyInterface: Any? = methodGetITelephony.invoke(telephonyManager)
+
+
+                // Get the endCall method from ITelephony
+                val telephonyInterfaceClass =
+                    Class.forName(telephonyInterface?.javaClass?.name ?: "ERROR?")
+                val methodEndCall: Method = telephonyInterfaceClass.getDeclaredMethod("endCall")
+
+                // Invoke endCall()
+                methodEndCall.invoke(telephonyInterface)
+            } catch (ex: Exception) { // Many things can go wrong with reflection calls
+                ex.printStackTrace()
+                Toasty.error(
+                    context,
+                    "Ứng dụng không thể can thiệp vào hệ thống để ngưng cuộc gọi",
+                    Toasty.LENGTH_SHORT
+                ).show()
+                return false
+            }
+            return true
         }
     }
 }

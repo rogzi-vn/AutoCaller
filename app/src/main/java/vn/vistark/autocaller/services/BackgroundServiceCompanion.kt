@@ -12,13 +12,15 @@ import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.models.storages.AppStorage
+import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import java.util.*
 import kotlin.Exception
+import kotlin.system.exitProcess
 
 class BackgroundServiceCompanion {
     companion object {
-        private val TAG = BackgroundServiceCompanion.javaClass.name
+        private val TAG = Companion::class.java.name
 
         // Cờ lưu giá trị có dừng tạm khi khi xuất hiện cuộc gọi đến
         var isStopTemporarily = false
@@ -30,6 +32,8 @@ class BackgroundServiceCompanion {
         var broadcastReceiver: BroadcastReceiver? = null
 
         var timerDelayBeforeNextCall: Timer? = null
+
+        var noSignalThresholdCountDown = AppStorage.ThresholdOfExitingAppIfNoSignalCalls
 
         fun Context.IsBackgroundServiceRunning(): Boolean {
             val manager = getSystemService(Service.ACTIVITY_SERVICE) as ActivityManager
@@ -70,13 +74,30 @@ class BackgroundServiceCompanion {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     // Cập nhật vào CSDL
                     if (CampaignCall.currentCampaignData != null) {
-                        CampaignCall.currentCampaignData!!.callState = PhoneCallState.CALLED
+                        val phoneDiffCall = PhoneCallUtils.getTimeHaveSignalInMilliseconds()
+
                         CampaignCall.currentCampaignData!!.isCalled = true
+                        CampaignCall.currentCampaignData!!.receivedSignalTimeInMilliseconds = phoneDiffCall
+
+                        if (phoneDiffCall <= AppStorage.ThresholdOfNoSignalCallInMilliseconds) {
+                            CampaignCall.currentCampaignData!!.callState = PhoneCallState.NO_SIGNAL
+                            --noSignalThresholdCountDown
+                        } else {
+                            noSignalThresholdCountDown = AppStorage.ThresholdOfExitingAppIfNoSignalCalls
+                            CampaignCall.currentCampaignData!!.callState = PhoneCallState.CALLED
+                        }
+
                         CampaignCall.updateCallState(
                             this@regisBroadcastReceiver,
                             currentCampaign!!,
                             CampaignCall.currentCampaignData!!
                         )
+                    }
+
+                    if (noSignalThresholdCountDown <= 0 && AppStorage.ThresholdOfExitingAppIfNoSignalCalls > 0) {
+                        unregisBroadcastReceiver(false)
+                        context?.StopBackgroundService()
+                        exitProcess(0)
                     }
 
                     // Cập nhật progress
@@ -124,6 +145,15 @@ class BackgroundServiceCompanion {
             }
         }
 
+        fun Context.StartBackgroundService() {
+            val intent = Intent(this, BackgroundService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        }
+
         fun Context.StartBackgroundService(campaign: CampaignModel) {
             // Nếu đã chạy rồi thì bỏ qua
             if (IsBackgroundServiceRunning())
@@ -144,12 +174,7 @@ class BackgroundServiceCompanion {
             isStartCampaign = true
             isStopTemporarily = false
 
-            val intent = Intent(this, BackgroundService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
+            StartBackgroundService()
 
             regisBroadcastReceiver()
 

@@ -2,10 +2,12 @@ package vn.vistark.autocaller.ui.campaign_detail
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +19,10 @@ import kotlinx.android.synthetic.main.activity_campaign_create.campaignItemProgr
 import kotlinx.android.synthetic.main.activity_campaign_create.campaignItemProgressCount
 import kotlinx.android.synthetic.main.activity_campaign_create.campaignItemProgressPercent
 import kotlinx.android.synthetic.main.activity_campaign_detail.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
 import vn.vistark.autocaller.controller.campaign_detail.CampaignResetLoader
@@ -24,6 +30,7 @@ import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
+import vn.vistark.autocaller.models.storages.AppStorage
 import vn.vistark.autocaller.services.BackgroundService
 import vn.vistark.autocaller.services.BackgroundServiceCompanion
 import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.IsBackgroundServiceRunning
@@ -34,6 +41,8 @@ import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.isSto
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import vn.vistark.autocaller.ui.campaign.CampaignActivity
 import vn.vistark.autocaller.ui.campaign_update.CampaignUpdateActivity
+import java.io.File
+import java.io.FileOutputStream
 import java.lang.Exception
 import kotlin.collections.ArrayList
 
@@ -95,8 +104,16 @@ class CampaignDetailActivity : AppCompatActivity() {
         // Sự kiện khi nhấn chỉnh sửa chiến dịch
         editBtnEvent()
 
+        // SK xuất file
+        exportBtnEvent()
+
         // Load 200 record đầu
         loadMore()
+
+        // Nếu có sự kiện khởi động chiến dịch ngay
+        if (intent.getBooleanExtra("IsStartNow", false)) {
+            acdBtnStart.performClick()
+        }
     }
 
     private fun editBtnEvent() {
@@ -118,6 +135,108 @@ class CampaignDetailActivity : AppCompatActivity() {
         }
     }
 
+    fun normalizeFileName(input: String, replacementChar: Char = '_'): String {
+        val invalidChars = charArrayOf('\\', '/', ':', '*', '?', '"', '<', '>', '|')
+
+        var result = input
+        for (invalidChar in invalidChars) {
+            result = result.replace(invalidChar, replacementChar)
+        }
+
+        // Loại bỏ khoảng trắng ở đầu và cuối chuỗi
+        result = result.trim()
+
+        // Thay thế khoảng trắng và các ký tự khoảng trắng bằng replacementChar
+        result = result.replace("\\s+".toRegex(), replacementChar.toString())
+
+        return result
+    }
+
+    private fun exportFileTxt() {
+        val filename = "[${System.currentTimeMillis()}}]${normalizeFileName(campaign?.name ?: "")}.txt";
+        try {
+
+
+            // Lấy đường dẫn của thư mục tài liệu của ứng dụng
+            val documentDir = this.getExternalFilesDir(null)
+
+            // Tạo một tệp tin với đường dẫn đầy đủ
+            val file = File(documentDir, filename)
+
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Tiến hành xuất tệp tại [${file!!.path}]?")
+                .setContentText("XUẤT DỮ LIỆU CHIẾN DỊCH?")
+                .showCancelButton(true)
+                .setCancelButton("Hủy thao tác") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                }
+                .setConfirmButton("Xác nhận") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+
+
+                    // Hiển thị hộp thoại SweetAlertLoading
+                    val loadingDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
+                    loadingDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
+                    loadingDialog.titleText = "Đang tiến hành xuất tệp $file"
+                    loadingDialog.setCancelable(false)
+                    loadingDialog.show()
+
+                    // Sử dụng Coroutine để thực hiện việc lưu file trong luồng khác
+                    GlobalScope.launch(Dispatchers.IO) {
+                        try {
+                            // Process
+                            val campaignDetails = campaignDataRepository.getAll(campaign!!.id)
+                            var textBuilder = ""
+                            campaignDetails.forEach { cpgDt ->
+                                textBuilder += "${cpgDt.phone}|${cpgDt.receivedSignalTimeInMilliseconds / 1000.0}\n"
+                            }
+
+                            // Mở tệp tin để ghi dữ liệu
+                            val fileOutputStream = FileOutputStream(file)
+
+                            // Ghi dữ liệu vào tệp tin
+                            fileOutputStream.write(textBuilder.toByteArray())
+
+                            // Đóng tệp tin
+                            fileOutputStream.close()
+
+                            // Ẩn hộp thoại SweetAlertLoading sau khi lưu thành công
+                            campaignTvOptionExportDataTxt.post {
+                                loadingDialog.dismissWithAnimation()
+                                loadingDialog.cancel()
+                            }
+
+                        } catch (e: Exception) {
+                            // Xử lý lỗi (có thể thay đổi hoặc bỏ qua)
+                            e.printStackTrace()
+
+                            // Ẩn hộp thoại SweetAlertLoading nếu có lỗi
+                            campaignTvOptionExportDataTxt.post {
+                                loadingDialog.dismissWithAnimation()
+                                loadingDialog.cancel()
+                            }
+                        }
+                    }
+                }.show()
+
+        } catch (e: Exception) {
+            // Xử lý lỗi (có thể thay đổi hoặc bỏ qua)
+            e.printStackTrace()
+        }
+    }
+
+    private fun exportBtnEvent() {
+        campaignTvOptionExportDataTxt.setOnClickListener {
+            // Tạm ngưng việc chạy chiến dịch để thực hiện việc chỉnh sửa
+            if (acdBtnPause.isEnabled)
+                acdBtnPause.performClick()
+
+            exportFileTxt()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_top_right_campaign_detail, menu)
         return super.onCreateOptionsMenu(menu)
@@ -128,9 +247,11 @@ class CampaignDetailActivity : AppCompatActivity() {
             R.id.trMenuReloadCampaign -> {
                 return confirmResetCampaign()
             }
+
             android.R.id.home -> {
                 onBackPressed()
             }
+
             else -> {
                 Toasty.error(this, "Không tìm thấy tùy chọn này", Toasty.LENGTH_SHORT, true).show()
             }
@@ -353,13 +474,19 @@ class CampaignDetailActivity : AppCompatActivity() {
         acdBtnPause.post {
             acdBtnPause.isEnabled = false
             acdBtnStart.isEnabled = false
-            SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                .setTitleText("Hoàn tất chiến dịch")
-                .setContentText("CHÚC MỪNG")
-                .setConfirmButton("Xác nhận") {
-                    it.dismissWithAnimation()
-                    it.cancel()
-                }.show()
+
+            if (AppStorage.TimerAutoRunCampaignInSeconds != 0) {
+                SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("Hoàn tất chiến dịch")
+                    .setContentText("CHÚC MỪNG")
+                    .setConfirmButton("Xác nhận") {
+                        it.dismissWithAnimation()
+                        it.cancel()
+                    }.show()
+            } else {
+                Toast.makeText(this, "CHÚC MỪNG: Hoàn tất chiến dịch", Toast.LENGTH_SHORT).show()
+                goBack()
+            }
         }
     }
 

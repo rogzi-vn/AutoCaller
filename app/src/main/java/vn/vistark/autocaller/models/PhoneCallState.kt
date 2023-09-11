@@ -9,5 +9,6 @@ class PhoneCallState {
         const val PHONE_NUMBER_ERROR = 4
         const val BLACK_LIST_IGNORED = 5
         const val SERVICE_PROVIDER_IGNORED = 6
+        const val NO_SIGNAL = 7 // Khi được cho là tín hiệu bị lỗi
     }
 }

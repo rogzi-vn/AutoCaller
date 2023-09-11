@@ -25,12 +25,22 @@ class SettingActivity : AppCompatActivity() {
         // Load lại dữ liệu trước đó
         settingEdtTimerDelay.setText(AppStorage.DelayTimeInSeconds.toString())
         settingEdtTimerCallIn.setText(AppStorage.DelayTimeCallInSeconds.toString())
+        // --
+        settingEdtTimerAutoRunCampaign.setText(AppStorage.TimerAutoRunCampaignInSeconds.toString())
+        settingEdtThresholdOfNoSignalCall.setText(AppStorage.ThresholdOfNoSignalCallInMilliseconds.toString())
+        settingEdtCountOfNoSignalCallToExit.setText(AppStorage.ThresholdOfExitingAppIfNoSignalCalls.toString())
 
         scHangUpAsSoonAs.isChecked = AppStorage.IsHangUpAsSoonAsUserAnswer
-
         scHangUpAsSoonAs.setOnClickListener {
             AppStorage.IsHangUpAsSoonAsUserAnswer = scHangUpAsSoonAs.isChecked
         }
+        // --
+        scAutoReOpenAppIfShutdownSuddenly.isChecked = AppStorage.IsAutoReopenAppIfShutdownSuddenly
+        scAutoReOpenAppIfShutdownSuddenly.setOnClickListener {
+            AppStorage.IsAutoReopenAppIfShutdownSuddenly =
+                scAutoReOpenAppIfShutdownSuddenly.isChecked
+        }
+
 
         // Đặt sự kiện lưu lại thiết lập
         settingBtnConfirmSave.setOnClickListener {
@@ -57,6 +67,10 @@ class SettingActivity : AppCompatActivity() {
         // Lưu thiết lập về thời gian thực hiện cho mỗi cuộc gọi
         if (!saveDelayTimeInCall())
             return
+
+        if (!saveTimerAutoRunCampaignInSeconds() || !saveThresholdOfNoSignalCallInMilliseconds() || !saveThresholdOfExitingAppIfNoSignalCalls()) {
+            return
+        }
 
         Toasty.success(this, "Cập nhật thiết lập thành công", Toasty.LENGTH_SHORT, true).show()
     }
@@ -108,6 +122,78 @@ class SettingActivity : AppCompatActivity() {
 
         // Nếu nhập thành công
         AppStorage.DelayTimeCallInSeconds = inpDelayTimeInCall
+
+        // Trả về true
+        return true
+    }
+
+    private fun saveTimerAutoRunCampaignInSeconds(): Boolean {
+        // Lấy giá trị mà người dùng đã nhập
+        var value = settingEdtTimerAutoRunCampaign.text.toString().toIntOrNull()
+
+        // Nếu không thể phân giải thành số
+        if (value == null) {
+            Toasty.error(this, "Số giây đợi không đúng", Toasty.LENGTH_SHORT, true).show()
+            return false
+        }
+
+        // Nếu giá trị nhỏ nhơn 0
+        if (value < 0) {
+            value = 0
+            settingEdtTimerAutoRunCampaign.setText(value.toString())
+            return false
+        }
+
+        // Nếu nhập thành công
+        AppStorage.TimerAutoRunCampaignInSeconds = value
+
+        // Trả về true
+        return true
+    }
+
+    private fun saveThresholdOfNoSignalCallInMilliseconds(): Boolean {
+        // Lấy giá trị mà người dùng đã nhập
+        var value = settingEdtThresholdOfNoSignalCall.text.toString().toLongOrNull()
+
+        // Nếu không thể phân giải thành số
+        if (value == null) {
+            Toasty.error(this, "Số mili giây đợi không đúng", Toasty.LENGTH_SHORT, true).show()
+            return false
+        }
+
+        // Nếu giá trị nhỏ nhơn 500
+        if (value < 500) {
+            value = 500
+            settingEdtThresholdOfNoSignalCall.setText(value.toString())
+            return false
+        }
+
+        // Nếu nhập thành công
+        AppStorage.ThresholdOfNoSignalCallInMilliseconds = value
+
+        // Trả về true
+        return true
+    }
+
+    private fun saveThresholdOfExitingAppIfNoSignalCalls(): Boolean {
+        // Lấy giá trị mà người dùng đã nhập
+        var value = settingEdtCountOfNoSignalCallToExit.text.toString().toIntOrNull()
+
+        // Nếu không thể phân giải thành số
+        if (value == null) {
+            Toasty.error(this, "Số lượng không đúng", Toasty.LENGTH_SHORT, true).show()
+            return false
+        }
+
+        // Nếu giá trị nhỏ nhơn 0
+        if (value < 0) {
+            value = 0
+            settingEdtCountOfNoSignalCallToExit.setText(value.toString())
+            return false
+        }
+
+        // Nếu nhập thành công
+        AppStorage.ThresholdOfExitingAppIfNoSignalCalls = value
 
         // Trả về true
         return true
