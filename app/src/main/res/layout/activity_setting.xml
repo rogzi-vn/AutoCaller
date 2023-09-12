@@ -305,6 +305,13 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true" />
             </RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Có hiệu lực sau khi khởi động lại ứng dụng."
+                android:textColor="@color/red_btn_bg_color"
+                android:textSize="11sp"
+                android:textStyle="italic" />
 
             <RelativeLayout
                 android:layout_width="match_parent"

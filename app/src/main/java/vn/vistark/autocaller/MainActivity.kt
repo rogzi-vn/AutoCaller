@@ -32,6 +32,11 @@ class MainActivity : AppCompatActivity() {
         // Khởi tạo các hằng số cơ bản và bộ nhớ lưu trữ cục bộ
         SPUtils.init(this)
 
+        // Thao tác sẽ đựợc apply sau khi ứng dụng được khởi động lại
+        if (AppStorage.IsAutoReopenAppIfShutdownSuddenly) {
+            Thread.setDefaultUncaughtExceptionHandler(DefaultExceptionHandler(this))
+        }
+
         // Khởi tạo bộ lưu trữ shared preference mặc định
         AppStorageManager.initialize(this)
 
