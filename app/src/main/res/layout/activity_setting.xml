@@ -308,7 +308,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Có hiệu lực sau khi khởi động lại ứng dụng."
+                android:text="Có hiệu lực sau khi khởi động lại ứng dụng. Chỉ áp dụng với các dòng Android nhỏ hơn 12"
                 android:textColor="@color/red_btn_bg_color"
                 android:textSize="11sp"
                 android:textStyle="italic" />

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -22,7 +23,7 @@ import kotlinx.android.synthetic.main.activity_campaign_detail.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import vn.vistark.autocaller.DefaultExceptionHandler
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
 import vn.vistark.autocaller.controller.campaign_detail.CampaignResetLoader
@@ -31,20 +32,18 @@ import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignDataRepository
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.models.storages.AppStorage
-import vn.vistark.autocaller.services.BackgroundService
 import vn.vistark.autocaller.services.BackgroundServiceCompanion
 import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.IsBackgroundServiceRunning
 import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.StartBackgroundService
 import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.StopBackgroundService
 import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.isStartCampaign
 import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.isStopTemporarily
-import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import vn.vistark.autocaller.ui.campaign.CampaignActivity
 import vn.vistark.autocaller.ui.campaign_update.CampaignUpdateActivity
+import vn.vistark.autocaller.utils.SPUtils
+import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.Exception
-import kotlin.collections.ArrayList
 
 
 class CampaignDetailActivity : AppCompatActivity() {
@@ -58,10 +57,31 @@ class CampaignDetailActivity : AppCompatActivity() {
 
     lateinit var campaignDataRepository: CampaignDataRepository
 
+    companion object {
+        var crrCampaignDetail: CampaignDetailActivity? = null
+
+        fun stopAndExitApplication() {
+            Log.e("ERROR_CEPTION", "1455" )
+            crrCampaignDetail?.pause()
+            crrCampaignDetail?.StopBackgroundService()
+            crrCampaignDetail?.finish()
+            //Stopping application
+            System.exit(0)
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_campaign_detail)
+
+        // Khởi tạo các hằng số cơ bản và bộ nhớ lưu trữ cục bộ
+        SPUtils.init(this)
+
+        // Thao tác sẽ đựợc apply sau khi ứng dụng được khởi động lại
+        if (AppStorage.IsAutoReopenAppIfShutdownSuddenly) {
+            Thread.setDefaultUncaughtExceptionHandler(DefaultExceptionHandler(this))
+        }
 
         // Thiết lập răng đây là lần đầu cho cuộc gọi
         PhoneStateReceiver.isFirstTime = true
@@ -111,9 +131,15 @@ class CampaignDetailActivity : AppCompatActivity() {
         loadMore()
 
         // Nếu có sự kiện khởi động chiến dịch ngay
-        if (intent.getBooleanExtra("IsStartNow", false)) {
-            acdBtnStart.performClick()
+        try {
+            if (intent.getBooleanExtra("IsStartNow", false)) {
+                acdBtnStart.performClick()
+            }
+        } catch (_: java.lang.Exception) {
+
         }
+
+        crrCampaignDetail = this
     }
 
     private fun editBtnEvent() {
@@ -153,7 +179,8 @@ class CampaignDetailActivity : AppCompatActivity() {
     }
 
     private fun exportFileTxt() {
-        val filename = "[${System.currentTimeMillis()}}]${normalizeFileName(campaign?.name ?: "")}.txt";
+        val filename =
+            "[${System.currentTimeMillis()}}]${normalizeFileName(campaign?.name ?: "")}.txt";
         try {
 
 
@@ -287,7 +314,7 @@ class CampaignDetailActivity : AppCompatActivity() {
     private fun stopRegisReciver() {
         try {
             unregisterReceiver(BackgroundServiceCompanion.broadcastReceiver)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
     }
 

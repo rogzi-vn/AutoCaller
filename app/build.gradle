@@ -11,9 +11,10 @@ android {
     defaultConfig {
         applicationId "vn.vistark.autocaller"
         minSdkVersion 14
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 30
-        versionCode 230820001
-        versionName "230820-001"
+        versionCode 230912001
+        versionName "230912-001"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

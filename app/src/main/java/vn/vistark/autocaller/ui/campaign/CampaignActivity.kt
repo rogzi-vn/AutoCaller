@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.telecom.TelecomManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -15,20 +14,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_campaign.*
+import vn.vistark.autocaller.DefaultExceptionHandler
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign.CampaignLoader
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.models.storages.AppStorage
-import vn.vistark.autocaller.services.BackgroundServiceCompanion
-import vn.vistark.autocaller.services.BackgroundServiceCompanion.Companion.StartBackgroundService
 import vn.vistark.autocaller.ui.campaign_create.CampaignCreateActivity
 import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 import vn.vistark.autocaller.ui.setting.SettingActivity
 import vn.vistark.autocaller.ui.sync_campaign_online.SyncCampaignOnline
 import vn.vistark.autocaller.utils.SPUtils
 import java.util.*
-import kotlin.collections.ArrayList
 
 class CampaignActivity : AppCompatActivity() {
     // Nơi chứa dữ liệu danh sách các chiến dịch
@@ -43,7 +40,13 @@ class CampaignActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_campaign)
 
+        // Khởi tạo các hằng số cơ bản và bộ nhớ lưu trữ cục bộ
         SPUtils.init(this)
+
+        // Thao tác sẽ đựợc apply sau khi ứng dụng được khởi động lại
+        if (AppStorage.IsAutoReopenAppIfShutdownSuddenly) {
+            Thread.setDefaultUncaughtExceptionHandler(DefaultExceptionHandler(this))
+        }
 
         // Ẩn thanh loading tải danh sách chiến dịch
         hideLoading()

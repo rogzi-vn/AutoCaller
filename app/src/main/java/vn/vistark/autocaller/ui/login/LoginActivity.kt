@@ -17,6 +17,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         // TODO: Remove after done debug
+//        gotoCampaign()
         if (BuildConfig.DEBUG) {
             gotoCampaign()
             return

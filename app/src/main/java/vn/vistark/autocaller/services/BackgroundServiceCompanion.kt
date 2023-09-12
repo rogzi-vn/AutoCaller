@@ -12,11 +12,10 @@ import vn.vistark.autocaller.controller.campaign_detail.CampaignCall
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.models.storages.AppStorage
+import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 import vn.vistark.autocaller.utils.call_phone.PhoneCallUtils
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import java.util.*
-import kotlin.Exception
-import kotlin.system.exitProcess
 
 class BackgroundServiceCompanion {
     companion object {
@@ -77,13 +76,15 @@ class BackgroundServiceCompanion {
                         val phoneDiffCall = PhoneCallUtils.getTimeHaveSignalInMilliseconds()
 
                         CampaignCall.currentCampaignData!!.isCalled = true
-                        CampaignCall.currentCampaignData!!.receivedSignalTimeInMilliseconds = phoneDiffCall
+                        CampaignCall.currentCampaignData!!.receivedSignalTimeInMilliseconds =
+                            phoneDiffCall
 
                         if (phoneDiffCall <= AppStorage.ThresholdOfNoSignalCallInMilliseconds) {
                             CampaignCall.currentCampaignData!!.callState = PhoneCallState.NO_SIGNAL
                             --noSignalThresholdCountDown
                         } else {
-                            noSignalThresholdCountDown = AppStorage.ThresholdOfExitingAppIfNoSignalCalls
+                            noSignalThresholdCountDown =
+                                AppStorage.ThresholdOfExitingAppIfNoSignalCalls
                             CampaignCall.currentCampaignData!!.callState = PhoneCallState.CALLED
                         }
 
@@ -95,33 +96,32 @@ class BackgroundServiceCompanion {
                     }
 
                     if (noSignalThresholdCountDown <= 0 && AppStorage.ThresholdOfExitingAppIfNoSignalCalls > 0) {
-                        unregisBroadcastReceiver(false)
-                        context?.StopBackgroundService()
-                        exitProcess(0)
-                    }
-
-                    // Cập nhật progress
-                    try {
-                        CampaignCall.act?.initCampaignData()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-
-                    // Renew trạng thái
-                    PhoneStateReceiver.previousState = "EXTRA_STATE_IDLE"
-
-                    //  Bắt đầu cuộc gọi tiếp theo sau DelayTimeInSeconds
-                    timerDelayBeforeNextCall = Timer()
-                    timerDelayBeforeNextCall!!.schedule(object : TimerTask() {
-                        override fun run() {
-                            this.cancel()
-                            if (isStartCampaign && !isStopTemporarily)
-                                CampaignCall.start(
-                                    this@regisBroadcastReceiver.applicationContext,
-                                    currentCampaign!!.id
-                                )
+                        Log.e("ERROR_CEPTION", "Choox nay" )
+                        CampaignDetailActivity.stopAndExitApplication()
+                    } else {
+                        // Cập nhật progress
+                        try {
+                            CampaignCall.act?.initCampaignData()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                    }, AppStorage.DelayTimeInSeconds * 1000L)
+
+                        // Renew trạng thái
+                        PhoneStateReceiver.previousState = "EXTRA_STATE_IDLE"
+
+                        //  Bắt đầu cuộc gọi tiếp theo sau DelayTimeInSeconds
+                        timerDelayBeforeNextCall = Timer()
+                        timerDelayBeforeNextCall!!.schedule(object : TimerTask() {
+                            override fun run() {
+                                this.cancel()
+                                if (isStartCampaign && !isStopTemporarily)
+                                    CampaignCall.start(
+                                        this@regisBroadcastReceiver.applicationContext,
+                                        currentCampaign!!.id
+                                    )
+                            }
+                        }, AppStorage.DelayTimeInSeconds * 1000L)
+                    }
                 }
             }
 
@@ -134,14 +134,16 @@ class BackgroundServiceCompanion {
 
         fun ClearDelayCallTimer() {
             try {
-                Log.w(TAG, "ClearDelayCallTimer: Đang tiến hành huỷ timer chờ gọi! $timerDelayBeforeNextCall")
+                Log.w(
+                    TAG,
+                    "ClearDelayCallTimer: Đang tiến hành huỷ timer chờ gọi! $timerDelayBeforeNextCall"
+                )
                 if (timerDelayBeforeNextCall != null) {
                     timerDelayBeforeNextCall?.cancel()
                     timerDelayBeforeNextCall?.purge()
                     timerDelayBeforeNextCall = null
                 }
-            } catch (e: Exception) {
-                e.printStackTrace();
+            } catch (_: Exception) {
             }
         }
 
