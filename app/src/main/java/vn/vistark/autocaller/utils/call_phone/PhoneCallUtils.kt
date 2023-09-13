@@ -42,6 +42,7 @@ class PhoneCallUtils {
 
         fun onHaveSignal() {
             phoneCallHaveSignalAt = System.currentTimeMillis()
+            Log.d(TAG, "onHaveSignal: $phoneCallStartAt -> $phoneCallHaveSignalAt")
         }
 
         fun startCall(context: Context, phoneNumber: String) {

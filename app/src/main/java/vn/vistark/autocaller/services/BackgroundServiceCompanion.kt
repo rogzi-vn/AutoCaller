@@ -74,6 +74,7 @@ class BackgroundServiceCompanion {
                     // Cập nhật vào CSDL
                     if (CampaignCall.currentCampaignData != null) {
                         val phoneDiffCall = PhoneCallUtils.getTimeHaveSignalInMilliseconds()
+                        Log.d(TAG, "onReceive: phoneDiffCall =>>>>> [${phoneDiffCall}]")
 
                         CampaignCall.currentCampaignData!!.isCalled = true
                         CampaignCall.currentCampaignData!!.receivedSignalTimeInMilliseconds =

@@ -2,14 +2,13 @@ package vn.vistark.autocaller.models.repositories
 
 import android.content.ContentValues
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
 import vn.vistark.autocaller.models.CampaignDataModel
 import vn.vistark.autocaller.models.DatabaseContext
 import vn.vistark.autocaller.models.PhoneCallState
 import vn.vistark.autocaller.utils.getBoolean
 import vn.vistark.autocaller.utils.getInt
 import vn.vistark.autocaller.utils.getString
+import java.io.FileOutputStream
 
 // https://stackoverflow.com/questions/10600670/sqlitedatabase-query-method
 
@@ -23,6 +22,10 @@ class CampaignDataRepository(val context: Context) {
             contentValues.put(CampaignDataModel.CAMPAIGN_ID, campaignDataModel.campaignId)
             contentValues.put(CampaignDataModel.PHONE, campaignDataModel.phone)
             contentValues.put(CampaignDataModel.CALL_STATE, campaignDataModel.callState)
+            contentValues.put(
+                CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS,
+                campaignDataModel.receivedSignalTimeInMilliseconds
+            )
             contentValues.put(
                 CampaignDataModel.INDEX_IN_CAMPAIGN,
                 campaignDataModel.indexInCampaign
@@ -80,7 +83,8 @@ class CampaignDataRepository(val context: Context) {
                     cursor.getString(CampaignDataModel.PHONE),
                     cursor.getInt(CampaignDataModel.CALL_STATE),
                     cursor.getInt(CampaignDataModel.INDEX_IN_CAMPAIGN),
-                    cursor.getBoolean(CampaignDataModel.IS_CALLED)
+                    cursor.getBoolean(CampaignDataModel.IS_CALLED),
+                    cursor.getInt(CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS) * 1L
                 )
                 // Theeo vào danh sách lưu trữ
                 campaignDatas.add(campaignData)
@@ -133,7 +137,8 @@ class CampaignDataRepository(val context: Context) {
                     cursor.getString(CampaignDataModel.PHONE),
                     cursor.getInt(CampaignDataModel.CALL_STATE),
                     cursor.getInt(CampaignDataModel.INDEX_IN_CAMPAIGN),
-                    cursor.getBoolean(CampaignDataModel.IS_CALLED)
+                    cursor.getBoolean(CampaignDataModel.IS_CALLED),
+                    cursor.getInt(CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS) * 1L
                 )
                 // Theeo vào danh sách lưu trữ
                 campaignDatas.add(campaignData)
@@ -152,6 +157,71 @@ class CampaignDataRepository(val context: Context) {
 
         // Trả về dữ liệu
         return campaignDatas
+    }
+
+    fun exportPhoneAndCallTimeToFile(
+        isOnlyExportCalledNumber: Boolean,
+        campaignId: Int,
+        fso: FileOutputStream,
+        progressMsgCallback: ((String) -> Unit)
+    ) {
+        var selection = "${CampaignDataModel.CAMPAIGN_ID} = ?"
+        var selectionArgs = arrayOf(campaignId.toString())
+
+        if (isOnlyExportCalledNumber) {
+            selection += " AND ${CampaignDataModel.IS_CALLED} = ?"
+            selectionArgs = arrayOf(campaignId.toString()).plus("1")
+        }
+
+        // Lấy con trỏ
+        val cursor = instance.readableDatabase.query(
+            true,
+            CampaignDataModel.TABLE_NAME,
+            arrayOf(
+                CampaignDataModel.PHONE,
+                CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS
+            ),
+            selection,
+            selectionArgs,
+            null,
+            null,
+            "${CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS} ASC",
+            null
+        )
+
+        var total = cursor.count
+        var current = 0
+
+        // Nếu không có bản ghi
+        if (!cursor.moveToFirst()) {
+            instance.readableDatabase.close()
+            cursor.close()
+            return
+        }
+
+        // Còn có thì tiến hành duyệt
+        do {
+            try {
+                val phoneNumber = cursor.getString(CampaignDataModel.PHONE)
+                val receivedSignalTimeInMilliseconds =
+                    cursor.getInt(CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS) * 1L
+                fso.write("${phoneNumber}|${receivedSignalTimeInMilliseconds / 1000.0}\n".toByteArray())
+                val progress = (current / total.toDouble()) * 100
+                progressMsgCallback.invoke("Đã xuất ${++current}/$total\n(~${progress.toInt()}%)")
+
+            } catch (e: Exception) {
+                // Sự đời khó lường trước
+                e.printStackTrace()
+            }
+
+        } while (cursor.moveToNext())
+
+        // Đóng con trỏ
+        cursor.close()
+
+        // Đóng trình đọc
+        instance.readableDatabase.close()
+
     }
 
 
@@ -188,7 +258,8 @@ class CampaignDataRepository(val context: Context) {
                     cursor.getString(CampaignDataModel.PHONE),
                     cursor.getInt(CampaignDataModel.CALL_STATE),
                     cursor.getInt(CampaignDataModel.INDEX_IN_CAMPAIGN),
-                    cursor.getBoolean(CampaignDataModel.IS_CALLED)
+                    cursor.getBoolean(CampaignDataModel.IS_CALLED),
+                    cursor.getInt(CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS) * 1L
                 )
                 // Theeo vào danh sách lưu trữ
                 campaignDatas.add(campaignData)
@@ -215,6 +286,7 @@ class CampaignDataRepository(val context: Context) {
         val contentValues = ContentValues()
         contentValues.put(CampaignDataModel.CALL_STATE, PhoneCallState.NOT_CALL)
         contentValues.put(CampaignDataModel.IS_CALLED, 0)
+        contentValues.put(CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS, 0L)
 
         // Ghi vào db
         val res =

@@ -15,6 +15,9 @@ import androidx.core.content.FileProvider
 import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_campaign_create.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import vn.vistark.autocaller.BuildConfig
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign_create.CampaignCreateController
@@ -117,30 +120,34 @@ class CampaignCreateActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG) {
             btnCreate10K.visibility = View.VISIBLE
             btnCreate10K.setOnClickListener {
-                val outputFile = File.createTempFile("test_phone_number_10K", ".txt", cacheDir)
+                GlobalScope.launch(Dispatchers.IO) {
+                    val outputFile = File.createTempFile("test_phone_number_10K", ".txt", cacheDir)
 
-                if (outputFile.exists()) {
-                    outputFile.delete() // Xoá file nếu tồn tại
+                    if (outputFile.exists()) {
+                        outputFile.delete() // Xoá file nếu tồn tại
+                    }
+
+                    for (i in 1..10000) {
+                        val phone = "032997" + String.format("%04d", i) + "\n"
+                        outputFile.appendText(phone)
+                    }
+
+                    // Trả về uri của file
+                    dataUri = FileProvider.getUriForFile(
+                        applicationContext,
+                        "${packageName}.provider",
+                        outputFile
+                    )
+
+                    btnCreate10K.post {
+                        fadeOutPicker()
+
+                        // Cập nhật đường dẫn vào TextBox
+                        campaignCreateEdtDataPath.setText(dataUri?.path ?: "Đã chọn thành công")
+                        // Mở khóa nút confirm
+                        loginBtnConfirmButton.isEnabled = true
+                    }
                 }
-
-                for (i in 1..1000) {
-                    val phone = "032997" + String.format("%04d",i) + "\n"
-                    outputFile.appendText(phone)
-                }
-
-                // Trả về uri của file
-                dataUri = FileProvider.getUriForFile(
-                    applicationContext,
-                    "${packageName}.provider",
-                    outputFile
-                )
-
-                fadeOutPicker()
-
-                // Cập nhật đường dẫn vào TextBox
-                campaignCreateEdtDataPath.setText(dataUri?.path ?: "Đã chọn thành công")
-                // Mở khóa nút confirm
-                loginBtnConfirmButton.isEnabled = true
             }
         }
 

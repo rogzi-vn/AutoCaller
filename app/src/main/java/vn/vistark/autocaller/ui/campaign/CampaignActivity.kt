@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_campaign.*
+import vn.vistark.autocaller.BuildConfig
 import vn.vistark.autocaller.DefaultExceptionHandler
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.controller.campaign.CampaignLoader
@@ -25,6 +26,7 @@ import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 import vn.vistark.autocaller.ui.setting.SettingActivity
 import vn.vistark.autocaller.ui.sync_campaign_online.SyncCampaignOnline
 import vn.vistark.autocaller.utils.SPUtils
+import java.lang.Exception
 import java.util.*
 
 class CampaignActivity : AppCompatActivity() {
@@ -78,7 +80,7 @@ class CampaignActivity : AppCompatActivity() {
             autoStartTimer = Timer()
             autoStartTimer!!.schedule(object : TimerTask() {
                 override fun run() {
-                    if (AppStorage.TimerAutoRunCampaignInSeconds == 0) {
+                    if (AppStorage.TimerAutoRunCampaignInSeconds == 0 || adapter.campaigns.size <= 0) {
                         return
                     }
                     Log.d("Campaign", "run: Campaign will be start in $countDown seconds")
@@ -131,6 +133,9 @@ class CampaignActivity : AppCompatActivity() {
 
     private fun removeCampaignEvent() {
         adapter.onLongClick = { campaign ->
+            if (BuildConfig.DEBUG) {
+                throw Exception("13534125")
+            }
             SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                 .setTitleText("Bạn có muốn xóa chiến dịch này cùng dữ liệu liên quan?")
                 .setContentText("XÓA CHIẾN DỊCH")
@@ -166,6 +171,9 @@ class CampaignActivity : AppCompatActivity() {
             }
 
             R.id.trSyncCampaignOnline -> {
+                if (BuildConfig.DEBUG) {
+                    System.exit(0)
+                }
                 return syncOnlineCampaign()
             }
 

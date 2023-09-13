@@ -90,7 +90,7 @@ class AppStorage {
         // Thời gian delay sau mỗi cuộc gọi, đơn vị tính bằng giây
         var DelayTimeInSeconds: Int
             get() {
-                return SPUtils.sp?.getInt("DelayTimeInSeconds", 10) ?: 10
+                return SPUtils.sp?.getInt("DelayTimeInSeconds", 2) ?: 2
             }
             set(value) {
                 SPUtils.sp?.edit()?.apply {
@@ -101,7 +101,7 @@ class AppStorage {
         // Thời gian thực hiện mỗi cuộc gọi
         var DelayTimeCallInSeconds: Int
             get() {
-                return SPUtils.sp?.getInt("DelayTimeCallInSeconds", 6) ?: 6
+                return SPUtils.sp?.getInt("DelayTimeCallInSeconds", 5) ?: 5
             }
             set(value) {
                 SPUtils.sp?.edit()?.apply {
@@ -112,7 +112,7 @@ class AppStorage {
         // settingEdtTimerAutoRunCampaign
         var TimerAutoRunCampaignInSeconds: Int
             get() {
-                return SPUtils.sp?.getInt("TimerAutoRunCampaignInSeconds", 10) ?: 10
+                return SPUtils.sp?.getInt("TimerAutoRunCampaignInSeconds", 30) ?: 30
             }
             set(value) {
                 SPUtils.sp?.edit()?.apply {
@@ -123,7 +123,7 @@ class AppStorage {
         // settingEdtThresholdOfNoSignalCall
         var ThresholdOfNoSignalCallInMilliseconds: Long
             get() {
-                return SPUtils.sp?.getLong("ThresholdOfNoSignalCallInMilliseconds", 3000L) ?: 3000L
+                return SPUtils.sp?.getLong("ThresholdOfNoSignalCallInMilliseconds", 500L) ?: 500L
             }
             set(value) {
                 SPUtils.sp?.edit()?.apply {
@@ -134,7 +134,7 @@ class AppStorage {
         // settingEdtCountOfNoSignalCallToExit
         var ThresholdOfExitingAppIfNoSignalCalls: Int
             get() {
-                return SPUtils.sp?.getInt("ThresholdOfExitingAppIfNoSignalCalls", 20) ?: 20
+                return SPUtils.sp?.getInt("ThresholdOfExitingAppIfNoSignalCalls", 0) ?: 0
             }
             set(value) {
                 SPUtils.sp?.edit()?.apply {

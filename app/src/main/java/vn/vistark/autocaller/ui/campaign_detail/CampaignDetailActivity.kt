@@ -61,7 +61,6 @@ class CampaignDetailActivity : AppCompatActivity() {
         var crrCampaignDetail: CampaignDetailActivity? = null
 
         fun stopAndExitApplication() {
-            Log.e("ERROR_CEPTION", "1455" )
             crrCampaignDetail?.pause()
             crrCampaignDetail?.StopBackgroundService()
             crrCampaignDetail?.finish()
@@ -178,9 +177,10 @@ class CampaignDetailActivity : AppCompatActivity() {
         return result
     }
 
-    private fun exportFileTxt() {
+    private fun exportFileTxt(isOnlyExportCalledNumber: Boolean) {
+        val prefix = if (isOnlyExportCalledNumber) "CALLED" else "ALL"
         val filename =
-            "[${System.currentTimeMillis()}}]${normalizeFileName(campaign?.name ?: "")}.txt";
+            "[${prefix}]_${normalizeFileName(campaign?.name ?: "")}_${System.currentTimeMillis() / 1000}.txt";
         try {
 
 
@@ -190,64 +190,63 @@ class CampaignDetailActivity : AppCompatActivity() {
             // Tạo một tệp tin với đường dẫn đầy đủ
             val file = File(documentDir, filename)
 
-            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                .setTitleText("Tiến hành xuất tệp tại [${file!!.path}]?")
-                .setContentText("XUẤT DỮ LIỆU CHIẾN DỊCH?")
-                .showCancelButton(true)
-                .setCancelButton("Hủy thao tác") {
-                    it.dismissWithAnimation()
-                    it.cancel()
-                }
-                .setConfirmButton("Xác nhận") {
-                    it.dismissWithAnimation()
-                    it.cancel()
+            // Hiển thị hộp thoại SweetAlertLoading
+            val loadingDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
+            loadingDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
+            loadingDialog.titleText = "Đang tiến hành xuất tệp $file"
+            loadingDialog.setCancelable(false)
+            loadingDialog.show()
 
+            // Sử dụng Coroutine để thực hiện việc lưu file trong luồng khác
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    // Mở tệp tin để ghi dữ liệu
+                    val fileOutputStream = FileOutputStream(file)
 
-                    // Hiển thị hộp thoại SweetAlertLoading
-                    val loadingDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
-                    loadingDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
-                    loadingDialog.titleText = "Đang tiến hành xuất tệp $file"
-                    loadingDialog.setCancelable(false)
-                    loadingDialog.show()
-
-                    // Sử dụng Coroutine để thực hiện việc lưu file trong luồng khác
-                    GlobalScope.launch(Dispatchers.IO) {
-                        try {
-                            // Process
-                            val campaignDetails = campaignDataRepository.getAll(campaign!!.id)
-                            var textBuilder = ""
-                            campaignDetails.forEach { cpgDt ->
-                                textBuilder += "${cpgDt.phone}|${cpgDt.receivedSignalTimeInMilliseconds / 1000.0}\n"
-                            }
-
-                            // Mở tệp tin để ghi dữ liệu
-                            val fileOutputStream = FileOutputStream(file)
-
-                            // Ghi dữ liệu vào tệp tin
-                            fileOutputStream.write(textBuilder.toByteArray())
-
-                            // Đóng tệp tin
-                            fileOutputStream.close()
-
-                            // Ẩn hộp thoại SweetAlertLoading sau khi lưu thành công
+                    // Process
+                    campaignDataRepository.exportPhoneAndCallTimeToFile(
+                        isOnlyExportCalledNumber,
+                        campaign!!.id,
+                        fileOutputStream
+                    ) { progressTxt ->
+                        if (loadingDialog.isShowing) {
                             campaignTvOptionExportDataTxt.post {
-                                loadingDialog.dismissWithAnimation()
-                                loadingDialog.cancel()
-                            }
-
-                        } catch (e: Exception) {
-                            // Xử lý lỗi (có thể thay đổi hoặc bỏ qua)
-                            e.printStackTrace()
-
-                            // Ẩn hộp thoại SweetAlertLoading nếu có lỗi
-                            campaignTvOptionExportDataTxt.post {
-                                loadingDialog.dismissWithAnimation()
-                                loadingDialog.cancel()
+                                loadingDialog.contentText = progressTxt
                             }
                         }
                     }
-                }.show()
 
+                    // Đóng tệp tin
+                    fileOutputStream.close()
+
+                    // Ẩn hộp thoại SweetAlertLoading sau khi lưu thành công
+                    campaignTvOptionExportDataTxt.post {
+                        loadingDialog.dismissWithAnimation()
+                        loadingDialog.cancel()
+
+                        SweetAlertDialog(
+                            this@CampaignDetailActivity,
+                            SweetAlertDialog.SUCCESS_TYPE
+                        )
+                            .setTitleText("Hoàn tất xuất dữ liệu")
+                            .setContentText("CHÚC MỪNG")
+                            .setConfirmButton("Xác nhận") { swt ->
+                                swt.dismissWithAnimation()
+                                swt.cancel()
+                            }.show()
+                    }
+
+                } catch (e: Exception) {
+                    // Xử lý lỗi (có thể thay đổi hoặc bỏ qua)
+                    e.printStackTrace()
+
+                    // Ẩn hộp thoại SweetAlertLoading nếu có lỗi
+                    campaignTvOptionExportDataTxt.post {
+                        loadingDialog.dismissWithAnimation()
+                        loadingDialog.cancel()
+                    }
+                }
+            }
         } catch (e: Exception) {
             // Xử lý lỗi (có thể thay đổi hoặc bỏ qua)
             e.printStackTrace()
@@ -260,7 +259,27 @@ class CampaignDetailActivity : AppCompatActivity() {
             if (acdBtnPause.isEnabled)
                 acdBtnPause.performClick()
 
-            exportFileTxt()
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Bạn muốn xuất dữ liệu theo lựa chọn nào?")
+                .setContentText("CHỌN LOẠI DỮ LIỆU")
+                .showCancelButton(true)
+                .setNeutralButton("Đóng") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                }.setCancelButton("Hết") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+
+                    // Chỉ xuất đã gọi => False
+                    exportFileTxt(false)
+                }
+                .setConfirmButton("Đã gọi") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+
+                    // Chỉ xuất đã gọi => True
+                    exportFileTxt(true)
+                }.show()
         }
     }
 
