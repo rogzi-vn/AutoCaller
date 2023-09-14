@@ -73,7 +73,7 @@ class BackgroundServiceCompanion {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     // Cập nhật vào CSDL
                     if (CampaignCall.currentCampaignData != null) {
-                        val phoneDiffCall = PhoneCallUtils.getTimeHaveSignalInMilliseconds()
+                        val phoneDiffCall = PhoneCallUtils.getTimePhoneCallFinished() - PhoneCallUtils.getTimeHaveSignalInMilliseconds()
                         Log.d(TAG, "onReceive: phoneDiffCall =>>>>> [${phoneDiffCall}]")
 
                         CampaignCall.currentCampaignData!!.isCalled = true
@@ -97,7 +97,6 @@ class BackgroundServiceCompanion {
                     }
 
                     if (noSignalThresholdCountDown <= 0 && AppStorage.ThresholdOfExitingAppIfNoSignalCalls > 0) {
-                        Log.e("ERROR_CEPTION", "Choox nay" )
                         CampaignDetailActivity.stopAndExitApplication()
                     } else {
                         // Cập nhật progress

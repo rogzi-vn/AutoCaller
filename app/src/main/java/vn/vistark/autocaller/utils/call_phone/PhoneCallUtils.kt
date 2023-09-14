@@ -30,15 +30,23 @@ class PhoneCallUtils {
         private var phoneCallHaveSignalAt: Long = 0L
 
         // Thời điểm mà tiến hành chấm dứt cuộc gọi
+        private var phoneCallKilledAt: Long = 0L
+
         private var phoneCallEndAt: Long = 0L
 
         private fun resetAll() {
             phoneCallStartAt = 0L
             phoneCallHaveSignalAt = 0L
-            phoneCallEndAt = 0L
+            phoneCallKilledAt = 0L
         }
 
         fun getTimeHaveSignalInMilliseconds() = phoneCallHaveSignalAt - phoneCallStartAt
+
+        fun getTimePhoneCallFinished() = phoneCallEndAt - phoneCallStartAt
+
+        fun onOnCallEnd() {
+            phoneCallEndAt = System.currentTimeMillis()
+        }
 
         fun onHaveSignal() {
             phoneCallHaveSignalAt = System.currentTimeMillis()
@@ -217,7 +225,7 @@ class PhoneCallUtils {
         }
 
         fun KillCall(context: Context): Boolean {
-            phoneCallEndAt = System.currentTimeMillis()
+            phoneCallKilledAt = System.currentTimeMillis()
             try {
                 // Get the boring old TelephonyManager
                 val telephonyManager =

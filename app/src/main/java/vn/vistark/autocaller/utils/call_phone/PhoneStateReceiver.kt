@@ -36,6 +36,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
                     // Nếu trạng thái trước đó là mình gọi, và bây giờ đã kết thúc
                     if (previousState == "EXTRA_STATE_OFFHOOK") {
+                        PhoneCallUtils.onOnCallEnd()
                         // Gửi thông báo
                         context.sendBroadcast(Intent(NAME))
                     }
