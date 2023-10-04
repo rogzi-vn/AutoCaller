@@ -45,7 +45,7 @@ class CampaignCreateATL(val context: CampaignCreateActivity, private val uri: Ur
         countTotalRecords()
 
         // Nhập dữ liệu
-        return importAllRecords()
+        return importAllShuffleRecords()
     }
 
     private fun importAllRecords(): Int {
@@ -86,6 +86,66 @@ class CampaignCreateATL(val context: CampaignCreateActivity, private val uri: Ur
 
             context.updateProgressState(campaignData, 1 + processCount++)
         }
+        // Đóng bộ đọc file
+        r.close()
+
+        // Đóng input stream reader
+        inpReader.close()
+
+        // Thông báo là transact đã thành công
+        db.setTransactionSuccessful()
+
+        // Kết thúc transact
+        db.endTransaction()
+
+        // Đóng database lại
+        db.close()
+
+        // Cập nhập tổng số SĐT đã import vào danh mục
+        context.campaign.totalImported = successCount
+
+        // Lưu lại vào CSDL
+        CampaignRepository(context).update(context.campaign)
+
+        return successCount
+    }
+
+    private fun importAllShuffleRecords(): Int {
+        val inpReader = InputStreamReader(context.contentResolver.openInputStream(uri!!))
+        val r = BufferedReader(inpReader)
+
+        db.beginTransaction()
+        r.readLines().shuffled().forEachIndexed { index, phoneNumber ->
+            // Khởi tạo dữ liệu
+            val campaignData =
+                CampaignDataModel(
+                    0,
+                    context.campaign.id,
+                    phoneNumber,
+                    PhoneCallState.NOT_CALL,
+                    index + 1,
+                    false
+                )
+
+            // Tạo bộ dữ liệu nhập
+            val values = CampaignDataRepository.createDataValues(campaignData)
+
+            // Lưu dữ liệu và đếm nếu thành công
+//            db.insert(CampaignDataModel.TABLE_NAME, null,values)
+
+            // Gọi phương thức nhập chung
+            if (db.insertWithOnConflict(
+                    CampaignDataModel.TABLE_NAME,
+                    null,
+                    values,
+                    SQLiteDatabase.CONFLICT_IGNORE
+                ) > 0
+            )
+                successCount++
+
+            context.updateProgressState(campaignData, index * 1L + 1)
+        }
+
         // Đóng bộ đọc file
         r.close()
 

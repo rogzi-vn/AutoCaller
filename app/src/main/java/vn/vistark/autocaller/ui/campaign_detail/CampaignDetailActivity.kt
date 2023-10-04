@@ -44,6 +44,7 @@ import vn.vistark.autocaller.utils.SPUtils
 import vn.vistark.autocaller.utils.call_phone.PhoneStateReceiver
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.system.exitProcess
 
 
 class CampaignDetailActivity : AppCompatActivity() {
@@ -65,7 +66,7 @@ class CampaignDetailActivity : AppCompatActivity() {
             crrCampaignDetail?.StopBackgroundService()
             crrCampaignDetail?.finish()
             //Stopping application
-            System.exit(0)
+            exitProcess(0)
         }
     }
 
@@ -376,6 +377,7 @@ class CampaignDetailActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun startBtnEvent() {
         acdBtnStart.setOnClickListener {
 
@@ -451,6 +453,7 @@ class CampaignDetailActivity : AppCompatActivity() {
         })
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun loadMore() {
         val phones = campaignDataRepository.getLimit(campaign!!.id, lastPhoneIndex, 100)
 

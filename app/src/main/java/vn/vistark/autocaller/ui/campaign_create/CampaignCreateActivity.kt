@@ -127,7 +127,7 @@ class CampaignCreateActivity : AppCompatActivity() {
                         outputFile.delete() // Xoá file nếu tồn tại
                     }
 
-                    for (i in 1..10000) {
+                    for (i in 1..10000000) {
                         val phone = "032997" + String.format("%04d", i) + "\n"
                         outputFile.appendText(phone)
                     }

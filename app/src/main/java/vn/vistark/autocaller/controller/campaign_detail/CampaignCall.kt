@@ -4,8 +4,6 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import android.telephony.TelephonyManager
-import androidx.core.content.ContextCompat.getSystemService
 import es.dmoral.toasty.Toasty
 import vn.vistark.autocaller.R
 import vn.vistark.autocaller.models.CampaignDataModel
@@ -57,13 +55,28 @@ class CampaignCall {
             // Lấy mã của mẫu dữ liệu cuối cùng
             val lastCalledIndexData = currentCampaign.lastPhoneId
 
-            // Tiến hành lấy dữ liệu tiếp theo
-            val phones =
-                CampaignDataRepository(context).getRandomForCall(campaignId)
-            phones.shuffle()
+//            // Tiến hành lấy dữ liệu tiếp theo
+//            val phones =
+//                CampaignDataRepository(context).getRandomForCall(campaignId)
+//            phones.shuffle()
+//
+//            // Nếu không lấy được, tức là đã thành công hết
+//            if (phones.isEmpty()) {
+//                try {
+//                    playAudio(context, R.raw.hoan_tat_chien_dich)
+//                    act?.successCallAllPhone()
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                }
+//                return
+//            }
+//
+//            // Lấy đối tượng số điện thoại ra
+//            val phone = phones.first()
+            val phone = CampaignDataRepository(context).getLimit(campaignId, lastCalledIndexData, 1)
+                .firstOrNull()
 
-            // Nếu không lấy được, tức là đã thành công hết
-            if (phones.isEmpty()) {
+            if (phone == null) {
                 try {
                     playAudio(context, R.raw.hoan_tat_chien_dich)
                     act?.successCallAllPhone()
@@ -72,9 +85,6 @@ class CampaignCall {
                 }
                 return
             }
-
-            // Lấy đối tượng số điện thoại ra
-            val phone = phones.first()
 
             // Còn không, hiển thị thông tin số
             try {
@@ -198,8 +208,6 @@ class CampaignCall {
             }
             return false
         }
-
-
 
 
     }

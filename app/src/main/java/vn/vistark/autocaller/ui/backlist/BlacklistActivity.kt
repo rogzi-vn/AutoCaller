@@ -88,6 +88,10 @@ class BlacklistActivity : AppCompatActivity() {
         blacklistSrvPickLayout.visibility = View.VISIBLE
 
         initBlackListRv()
+
+        if (intent.getBooleanExtra("ONLINE", false)) {
+            abSwSwitchMethod.performClick()
+        }
     }
 
     private fun initBlackListRv() {

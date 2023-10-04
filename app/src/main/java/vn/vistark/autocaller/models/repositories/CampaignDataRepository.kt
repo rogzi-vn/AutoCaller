@@ -226,7 +226,12 @@ class CampaignDataRepository(val context: Context) {
 
 
     // Nên coi http://sqlfiddle.com/#!5/d0a2d/2746
-    fun getLimit(campaginId: Int, lastCampaignDataId: Int, limit: Long): Array<CampaignDataModel> {
+    fun getLimit(
+        campaginId: Int,
+        lastCampaignDataId: Int,
+        limit: Long,
+        isIgnoreOrder: Boolean = true
+    ): Array<CampaignDataModel> {
         // Khai báo biến chứa danh sách
         val campaignDatas = ArrayList<CampaignDataModel>()
         // Lấy con trỏ
@@ -238,7 +243,8 @@ class CampaignDataRepository(val context: Context) {
             arrayOf(lastCampaignDataId.toString(), campaginId.toString()),
             null,
             null,
-            "${CampaignDataModel.CALL_STATE} DESC, ${CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS} ASC, ${CampaignDataModel.ID} ASC",
+            if (isIgnoreOrder) "" else
+                "${CampaignDataModel.CALL_STATE} DESC, ${CampaignDataModel.RECEIVED_SIGNAL_TIME_IN_MILLISECONDS} ASC, ${CampaignDataModel.ID} ASC",
             limit.toString()
         )
         // Nếu không có bản ghi

@@ -21,6 +21,7 @@ import vn.vistark.autocaller.controller.campaign.CampaignLoader
 import vn.vistark.autocaller.models.CampaignModel
 import vn.vistark.autocaller.models.repositories.CampaignRepository
 import vn.vistark.autocaller.models.storages.AppStorage
+import vn.vistark.autocaller.ui.backlist.BlacklistActivity
 import vn.vistark.autocaller.ui.campaign_create.CampaignCreateActivity
 import vn.vistark.autocaller.ui.campaign_detail.CampaignDetailActivity
 import vn.vistark.autocaller.ui.setting.SettingActivity
@@ -171,10 +172,11 @@ class CampaignActivity : AppCompatActivity() {
             }
 
             R.id.trSyncCampaignOnline -> {
-                if (BuildConfig.DEBUG) {
-                    System.exit(0)
-                }
                 return syncOnlineCampaign()
+            }
+
+            R.id.trSyncBlackListOnline -> {
+                return syncOnlineBlackList()
             }
 
             else -> {
@@ -186,6 +188,14 @@ class CampaignActivity : AppCompatActivity() {
 
     private fun syncOnlineCampaign(): Boolean {
         val intent = Intent(this, SyncCampaignOnline::class.java)
+        startActivity(intent)
+        finish()
+        return true
+    }
+
+    private fun syncOnlineBlackList(): Boolean {
+        val intent = Intent(this, BlacklistActivity::class.java)
+        intent.putExtra("ONLINE", true)
         startActivity(intent)
         finish()
         return true

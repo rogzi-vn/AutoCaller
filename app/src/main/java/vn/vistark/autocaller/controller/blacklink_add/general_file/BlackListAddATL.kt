@@ -14,7 +14,7 @@ class BlackListAddATL(val context: BlacklistActivity, private val uri: Uri?) :
     AsyncTaskLoader<Int>(context) {
 
     // Kho
-    val db = DatabaseContext(context).writableDatabase
+    private val db = DatabaseContext(context).writableDatabase
 
     // Biến chứa số bản ghi upload thành công
     var successCount = 0
@@ -113,4 +113,5 @@ class BlackListAddATL(val context: BlacklistActivity, private val uri: Uri?) :
         // Ẩn loading nếu đang hiện
         context.hideLoading()
     }
+
 }

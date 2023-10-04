@@ -58,7 +58,7 @@
             android:id="@+id/campaignLnImportLayoutTvHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tiến độ nhập liệu cho danh sách đen"
+            android:text="Tiến độ nhập liệu"
             android:textColor="#000"
             android:textSize="14sp"
             android:textStyle="bold" />
